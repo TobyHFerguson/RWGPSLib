@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "prod:pull": "npx clasp-env --folder . --scriptId 1LrtdhxRlvd3Ep5Z2M7KCrii6VlMiFLR8Q39X24y7qV-0DsBDl-76qivO & clasp pull",
-    "prod:push": "npx clasp-env --folder . --scriptId 1LrtdhxRlvd3Ep5Z2M7KCrii6VlMiFLR8Q39X24y7qV-0DsBDl-76qivO & clasp push"
+    "prod:push": "npx clasp-env --folder . --scriptId 1LrtdhxRlvd3Ep5Z2M7KCrii6VlMiFLR8Q39X24y7qV-0DsBDl-76qivO & clasp push",
+    "test": "mocha -R min --watch test/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "chai": "^4.3.7",
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "sinon": "^15.2.0"
   }
 }
