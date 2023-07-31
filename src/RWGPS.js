@@ -726,9 +726,6 @@ if (typeof module !== 'undefined') {
   module.exports = { RWGPS, RWGPSService }
 }
 
-
-
-
 if (typeof module !== 'undefined') {
   module.exports = RWGPS;
 }

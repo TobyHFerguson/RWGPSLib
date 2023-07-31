@@ -44,6 +44,16 @@ const Globals = {
 const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals)
 const rwgps = new RWGPS(rwgpsService);
 const eventFactory = EventFactory(Globals);
+
+function printTimings_(times, prefix) {
+  const total = times.reduce((p, t) => p + t, 0);
+  const avg = total / times.length;
+  const max = times.reduce((p, t) => p >= t ? p : t, 0);
+  const min = times.reduce((p, t) => p <= t ? p : t, 10000);
+  console.log(`${prefix} - Average: ${avg} min: ${min} max: ${max}, total: ${total}`);
+}
+
+
 function testGetRSVPCounts() {
   const test_cases = [
     ['https://ridewithgps.com/events/196660-copied-event', 15],
@@ -85,15 +95,15 @@ function testEditEvents() {
     return urls;
   }
 
-  function test(eventEditObjects, f) {
+  function test(eventEditObjects, test_function) {
     const timings = [];
 
     for (let i = 0; i < NUMTESTS; i++) {
       const start = new Date();
-      f(eventEditObjects);
+      test_function(eventEditObjects);
       timings.push(new Date() - start);
     }
-    printTimings_(timings, f.name);
+    printTimings_(timings, test_function.name);
   }
 
   function editSingle(eventEditObjects) {
@@ -164,26 +174,6 @@ function testGetAll() {
 //   rwgps.batch_delete_events([event_URL]);
 // }
 
-function testEditEvent() {
-  const event = {
-    all_day: '0',
-    auto_expire_participants: '1',
-    desc: 'Ride Leader: Toby Ferguson\n\n    Address: Seascape County Park, Sumner Ave, Aptos, CA 95003\n          \nArrive 9:45 AM for a 10:00 AM rollout.\n  \nAll participants are assumed to have read and agreed to the clubs ride policy: https://scccc.clubexpress.com/content.aspx?page_id=22&club_id=575722&module_id=137709\n  \nNote: In a browser use the "Go to route" link below to open up the route.',
-    location: 'Seascape County Park',
-    name: 'Sun A (1/1 10:00) [1] SCP - Seascape/Corralitos',
-    organizer_tokens: ['302732'],
-    route_ids: ['17166902'],
-    start_date: '2023-01-01T10:00.000-08:00',
-    start_time: '21899-12-30T10:00.000-08:00',
-    visibility: 0,
-  }
-  const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
-  const rwgps = new RWGPS(rwgpsService);
-  const event_URL = rwgps.copy_template_("https://ridewithgps.com/events/194877");
-  console.log(`New Event URL: ${event_URL}`);
-  rwgps.edit_event(event_URL, event);
-  console.log(rwgps.get_event(event_URL));
-}
 // function testGetParticipants() {
 //   let rwgps, event_URL;
 //   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
