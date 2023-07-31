@@ -224,14 +224,20 @@ function testImportDeleteRoute() {
 function testUdatingRouteExpiration() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
-  rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882", "11/22/2023");
-  const new_tag_found = rwgps.getRouteObject("https://ridewithgps.com/routes/41365882").tag_names.includes("expires: 11/23/2023")
+  const testRoute = "https://ridewithgps.com/routes/41365882";
+  const oldExpiryDate = "11/22/2023";
+  const oldTag = `expires: ${oldExpiryDate}`;
+  const newExpiryDate = "11/23/2023";
+  const newTag = `expires: ${newExpiryDate}`;
+  rwgps.setRouteExpiration(testRoute, oldExpiryDate);
+  rwgps.setRouteExpiration(testRoute, newExpiryDate);
+  const new_tag_found = rwgps.getRouteObject(testRoute).tag_names.includes(newTag)
   if (!new_tag_found) {
-    throw Error("testUdatingRouteExpiration() failed - no tag 'expires: 11/23/2023' was found");
+    throw Error(`${this.name}() failed - no tag "${newTag}" was found on route ${testRoute}`);
   }
-  const old_tag_found = rwgps.getRouteObject("https://ridewithgps.com/routes/41365882").tag_names.includes("expires: 11/22/2023")
+  const old_tag_found = rwgps.getRouteObject(testRoute).tag_names.includes(oldTag)
   if (old_tag_found) {
-    throw Error("testDeletingRouteExpiration() failed - unexpectedly found expired tag 'expires: 11/22/2023'");
+    throw Error(`${this.name}() failed - old tag "${oldTag}" was found on route ${testRoute}`);
   }
 }
 function testSettingDeletingRouteExpiration() {
