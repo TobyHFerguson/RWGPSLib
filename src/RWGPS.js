@@ -486,7 +486,7 @@ class RWGPSService {
   importRoute(routeObject) {
     const url = routeObject.url + "/copy.json";
     const payload = {
-      "user_id": 621846,
+      "user_id": 621846, // SCCCC user
       "asset_type": "route",
       "privacy_code": null,
       "include_photos": false,

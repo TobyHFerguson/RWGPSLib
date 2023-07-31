@@ -1,8 +1,8 @@
 //=========== Tests ===========
 const Credentials = {
-  username: "rides@santacruzcycling.org",
-  password: "E!o0TqX0fiW4RBdu"
-}
+    username: "rides@santacruzcycling.org", 
+    password: "E!o0TqX0fiW4RBdu"
+  }
 const Globals = {
   STARTDATETIMECOLUMNNAME: "Date Time",
   GROUPCOLUMNNAME: "Group",
@@ -143,7 +143,7 @@ function testGetAll() {
     return new Date() - start;
   }
 
-  const events = ['https://ridewithgps.com/events/196660-copied-event', 'https://ridewithgps.com/events/193587-copied-event'];
+  const events = [ 'https://ridewithgps.com/events/196660-copied-event', 'https://ridewithgps.com/events/193587-copied-event' ];
   const urls = [];
   let timings = [];
   for (let i = 0; i < 100; i++) {
@@ -196,7 +196,7 @@ function testRoundTrip() {
         console.error("Expected keys to be same - they weren't")
       }
     }
-    catch (e) {
+    catch(e) {
       throw e;
     }
     finally {
@@ -213,8 +213,8 @@ function testImportDeleteRoute() {
   const rwgps = new RWGPS(rwgpsService);
   const routes = [];
   try {
-    routes.push(rwgps.importRoute('https://ridewithgps.com/routes/19551869'));
-    routes.push(rwgps.importRoute({ url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's new route", expiry: '12/24/2022' }));
+  routes.push(rwgps.importRoute('https://ridewithgps.com/routes/19551869'));
+  routes.push(rwgps.importRoute({ url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's new route", expiry: '12/24/2022' }));
   }
   finally {
     rwgps.batch_delete_routes(routes);
@@ -225,7 +225,6 @@ function testUdatingRouteExpiration() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
   rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882", "11/22/2023");
-  rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882", "11/23/2023");
   const new_tag_found = rwgps.getRouteObject("https://ridewithgps.com/routes/41365882").tag_names.includes("expires: 11/23/2023")
   if (!new_tag_found) {
     throw Error("testUdatingRouteExpiration() failed - no tag 'expires: 11/23/2023' was found");
@@ -235,24 +234,26 @@ function testUdatingRouteExpiration() {
     throw Error("testDeletingRouteExpiration() failed - unexpectedly found expired tag 'expires: 11/22/2023'");
   }
 }
-function testDeletingRouteExpiration() {
+function testSettingDeletingRouteExpiration() {
+  const testRoute = "https://ridewithgps.com/routes/41365882";
+  const expiryDate = "11/22/2023";
+  const tag = `expires: ${expiryDate}`;
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
-  rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882", "11/22/2023");
-  rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882");
-  const tag_found = rwgps.getRouteObject("https://ridewithgps.com/routes/41365882").tag_names.includes("expires: 11/22/2023")
-  if (tag_found) {
-    throw Error("testDeletingRouteExpiration() failed - unexpectedly found deleted tag 'expires: 11/22/2023'");
+  rwgps.setRouteExpiration(testRoute, expiryDate);
+  if (!rwgps.getRouteObject(testRoute).tag_names.includes(tag)) {
+    throw Error(`${this.name}() failed - no tag "${tag}" was found on route ${testRoute}`);
+  }
+  rwgps.setRouteExpiration(testRoute);
+  if (rwgps.getRouteObject(testRoute).tag_names.includes(tag)) {
+    throw Error(`${this.name}() failed - unexpectedly found deleted tag "${tag}" on route ${testRoute}`);
   }
 }
 function testSetRouteExpiration() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
   rwgps.setRouteExpiration("https://ridewithgps.com/routes/41365882", "11/22/2023");
-  const tag_found = rwgps.getRouteObject("https://ridewithgps.com/routes/41365882").tag_names.includes("expires: 11/22/2023")
-  if (!tag_found) {
-    throw Error("testSetRouteExpiration() failed - no tag 'expires: 11/22/2023' was found");
-  }
+  
 }
 function testTagEvents() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
