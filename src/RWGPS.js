@@ -109,8 +109,8 @@ class RWGPS {
     catch (e) {
       console.warn(`${e.message} - original URL: ${e_url}`)
       return { name: "No Event Found", participants: [] }
+    }
   }
-}
 
 
   /**
@@ -211,11 +211,23 @@ class RWGPS {
    * 
    * @param {URL[]} event_urls event urls to be deleted
    * @returns response from rwgps
+   * @throws Exception if there's an error
    */
   batch_delete_events(event_urls) {
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
     return this.rwgpsService.batch_delete_events(event_ids);
   }
+  /**
+     * 
+     * @param {URL[]} route_urls route urls to be deleted
+     * @returns response from rwgps
+     * @throws Exception if there's an error
+     */
+  batch_delete_routes(route_urls) {
+    let event_ids = route_urls.map(e => e.split('/')[4].split('-')[0]);
+    return this.rwgpsService.batch_delete_routes(event_ids);
+  }
+
   /**
    * Add the tags to the events. Both arrays must be non-empty. Idempotent.
    * @param {string[]} event_urls - the array of event urls
@@ -311,6 +323,7 @@ class RWGPS {
    * Import a route from a foreign route URL into the club library
    * @param {string |ForeignRoute} route - the foreign route url or object
    * @returns {string} url - the url of the new route in the club library
+   * @throws Exception if the import fails for any reason.
    */
   importRoute(route) {
     let fr;
@@ -598,11 +611,27 @@ class RWGPSService {
 
   /**
    * Delete multiple events
-   * @param{event_ids} - an array containing the ids of the events to delete
+   * @param{string[]} event_ids - an array containing the ids of the events to delete
    */
   batch_delete_events(event_ids) {
     let url = "https://ridewithgps.com/events/batch_destroy.json";
     const payload = { event_ids: event_ids.join() }
+    const options = {
+      method: 'post',
+      headers: { 'cookie': this.cookie },
+      followRedirects: false,
+      payload: payload
+    }
+    return this._send_request(url, options);
+  }
+
+  /**
+   * Delete multiple routes
+   * @param{string[]} route_ids - an array containing the ids of the routes to delete
+   */
+  batch_delete_routes(route_ids) {
+    let url = "https://ridewithgps.com/routes/batch_destroy.json";
+    const payload = { route_ids: route_ids.join(',') }
     const options = {
       method: 'post',
       headers: { 'cookie': this.cookie },
