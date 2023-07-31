@@ -177,7 +177,7 @@ class RWGPS {
     let new_event = { ...event, all_day: "1" }
     let response = this.rwgpsService.edit_event(event_url, new_event);
     response = this.rwgpsService.edit_event(event_url, event);
-    if (response.getResponseCode() >= 500) {
+    if (response.getResponseCode() !== 200) {
       throw Error(`received a code ${response.getResponseCode()} when editing event ${event_url}`);
     }
     return response;
@@ -207,6 +207,11 @@ class RWGPS {
     const events = responses.map(response => response["event"]);
     return events;
   }
+  /**
+   * 
+   * @param {URL[]} event_urls event urls to be deleted
+   * @returns response from rwgps
+   */
   batch_delete_events(event_urls) {
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
     return this.rwgpsService.batch_delete_events(event_ids);

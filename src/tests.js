@@ -185,25 +185,26 @@ function testRoundTrip() {
   try {
     const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
     rwgps = new RWGPS(rwgpsService);
-    event_URL = rwgps.copy_template_("https://ridewithgps.com/events/196910");
-    console.log(`New Event URL: ${event_URL}`);
-    const initial_body = rwgps.get_event(event_URL);
-    initial_body.organizer_ids = initial_body.organizer_ids.join(',');
-    initial_body.route_ids = initial_body.routes.map(r => r.id).join(',');
-    const sa = initial_body.starts_at ? initial_body.starts_at : new Date();
-    initial_body.start_date = sa.toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
-    initial_body.start_time = sa.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "numeric" });
-
-    const ibk = Object.keys(initial_body);
-    const new_body = JSON.parse(rwgps.edit_event(event_URL, initial_body).getContentText());
-    const nbk = Object.keys(new_body);
-    if (ibk.length !== nbk.length) {
-      console.log("Expected keys to be same - they weren't")
+    event_URL = rwgps.copy_template_("https://ridewithgps.com/events/196660");
+    const event = eventFactory.fromRwgpsEvent(rwgps.get_event(event_URL))
+    try {
+      response = rwgps.edit_event(event_URL, event);
+      const new_event = eventFactory.fromRwgpsEvent(JSON.parse(response.getContentText()));
+      const ibk = Object.keys(event);
+      const nbk = Object.keys(new_event);
+      if (ibk.length !== nbk.length) {
+        console.error("Expected keys to be same - they weren't")
+      }
+    }
+    catch(e) {
+      throw e;
+    }
+    finally {
+      rwgps.batch_delete_events([event_URL])
     }
   }
   catch (e) {
-    console.log(e);
-    rwgps.batch_delete_events([event_URL]);
+    console.error(e);
   }
 }
 
