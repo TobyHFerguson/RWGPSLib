@@ -1,7 +1,7 @@
 //=========== Tests ===========
 const Credentials = {
-  username: "toby.h.ferguson@icloud.com",
-  password: "1rider1"
+  username: "rides@santacruzcycling.org",
+  password: "E!o0TqX0fiW4RBdu"
 }
 const Globals = {
   STARTDATETIMECOLUMNNAME: "Date Time",
@@ -143,7 +143,7 @@ function testGetAll() {
     return new Date() - start;
   }
 
-  const events = [ 'https://ridewithgps.com/events/196660-copied-event', 'https://ridewithgps.com/events/193587-copied-event' ];
+  const events = ['https://ridewithgps.com/events/196660-copied-event', 'https://ridewithgps.com/events/193587-copied-event'];
   const urls = [];
   let timings = [];
   for (let i = 0; i < 100; i++) {
@@ -196,7 +196,7 @@ function testRoundTrip() {
         console.error("Expected keys to be same - they weren't")
       }
     }
-    catch(e) {
+    catch (e) {
       throw e;
     }
     finally {
@@ -208,11 +208,17 @@ function testRoundTrip() {
   }
 }
 
-function testImportRoute() {
+function testImportDeleteRoute() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
-  console.log(rwgps.importRoute('https://ridewithgps.com/routes/19551869'));
-  console.log(rwgps.importRoute({ url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's new route", expiry: '12/24/2022' }));
+  const routes = [];
+  try {
+    routes.push(rwgps.importRoute('https://ridewithgps.com/routes/19551869'));
+    routes.push(rwgps.importRoute({ url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's new route", expiry: '12/24/2022' }));
+  }
+  finally {
+    rwgps.batch_delete_routes(routes);
+  }
 }
 
 function testUdatingRouteExpiration() {
