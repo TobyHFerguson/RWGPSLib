@@ -1,49 +1,50 @@
 //=========== Tests ===========
 const Credentials = {
-  username: "toby.h.ferguson@icloud.com", 
+  username: "toby.h.ferguson@icloud.com",
   password: "1rider1"
 }
 const Globals = {
-    STARTDATETIMECOLUMNNAME: "Date Time",
-    GROUPCOLUMNNAME: "Group",
-    STARTLOCATIONCOLUMNNAME: "Start Location",
-    ROUTECOLUMNNAME: "Route",
-    RIDELEADERCOLUMNNAME: "Ride Leader",
-    RIDECOLUMNNAME: "Ride",
-    ADDRESSCOLUMNNAME: "Address",
-    LOCATIONCOLUMNNAME: "Location",
-    PREFIXCOLUMNNAME: "Prefix",
+  STARTDATETIMECOLUMNNAME: "Date Time",
+  GROUPCOLUMNNAME: "Group",
+  STARTLOCATIONCOLUMNNAME: "Start Location",
+  ROUTECOLUMNNAME: "Route",
+  RIDELEADERCOLUMNNAME: "Ride Leader",
+  RIDECOLUMNNAME: "Ride",
+  ADDRESSCOLUMNNAME: "Address",
+  LOCATIONCOLUMNNAME: "Location",
+  PREFIXCOLUMNNAME: "Prefix",
 
-    RIDE_LEADER_TBD_NAME: 'To Be Determined',
+  RIDE_LEADER_TBD_NAME: 'To Be Determined',
 
-    A_TEMPLATE: `https://ridewithgps.com/events/186557-a-template`,
-    B_TEMPLATE: `https://ridewithgps.com/events/186234-b-template`,
-    C_TEMPLATE: `https://ridewithgps.com/events/186235-c-template`,
-    SIGN_IN_URI: `https://ridewithgps.com/organizations/47/sign_in`,
-    EVENTS_URI: 'https://ridewithgps.com/events/',
+  A_TEMPLATE: `https://ridewithgps.com/events/186557-a-template`,
+  B_TEMPLATE: `https://ridewithgps.com/events/186234-b-template`,
+  C_TEMPLATE: `https://ridewithgps.com/events/186235-c-template`,
+  SIGN_IN_URI: `https://ridewithgps.com/organizations/47/sign_in`,
+  EVENTS_URI: 'https://ridewithgps.com/events/',
 
-    SCCCC_USER_ID: 621846,
-    RIDE_LEADER_TBD_ID: 4733240,
+  SCCCC_USER_ID: 621846,
+  RIDE_LEADER_TBD_ID: 4733240,
 
-    METERS_TO_FEET: 3.28084,
-    METERS_TO_MILES: 6.213712e-4,
+  METERS_TO_FEET: 3.28084,
+  METERS_TO_MILES: 6.213712e-4,
 
-    // LENGTHS are in miles
-    // ELEVATION_GAINS are in feet
-    C_RIDE_MAX_LENGTH: 35,
-    C_RIDE_MAX_ELEVATION_GAIN: 2000,
-    B_RIDE_MAX_LENGTH: 50,
-    B_RIDE_MAX_ELEVATION_GAIN: 3000,
-    A_RIDE_MIN_LENGTH: 40,
-    A_RIDE_MAX_LENGTH: 80,
-    A_RIDE_MIN_ELEVATION_GAIN: 3000,
+  // LENGTHS are in miles
+  // ELEVATION_GAINS are in feet
+  C_RIDE_MAX_LENGTH: 35,
+  C_RIDE_MAX_ELEVATION_GAIN: 2000,
+  B_RIDE_MAX_LENGTH: 50,
+  B_RIDE_MAX_ELEVATION_GAIN: 3000,
+  A_RIDE_MIN_LENGTH: 40,
+  A_RIDE_MAX_LENGTH: 80,
+  A_RIDE_MIN_ELEVATION_GAIN: 3000,
 
-    // Number of days after an event or an import that a route will expire
-    EXPIRY_DELAY: 30,
+  // Number of days after an event or an import that a route will expire
+  EXPIRY_DELAY: 30,
 }
+const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals)
+const rwgps = new RWGPS(rwgpsService);
+const eventFactory = EventFactory(Globals);
 function testGetRSVPCounts() {
-  const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
-  const rwgps = new RWGPS(rwgpsService);
   const test_cases = [
     ['https://ridewithgps.com/events/196660-copied-event', 15],
     ['https://ridewithgps.com/events/193587-copied-event', 6],
@@ -54,7 +55,7 @@ function testGetRSVPCounts() {
     const uut = test_cases[i][0]
     const expected = test_cases[i][1];
     if (actual !== expected) {
-      console.log(`Error - expected uut: ${uut} to give ${expected} but got ${actual}`)
+      console.error(`Error - expected uut: ${uut} to give ${expected} but got ${actual}`)
     }
   })
 }
@@ -62,7 +63,14 @@ function testGetEvents() {
   const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
   const rwgps = new RWGPS(rwgpsService);
   const events = rwgps.get_events([Globals.A_TEMPLATE, Globals.B_TEMPLATE]);
-  if (!(events.length == 2)) console.log("didn't get the expected number of events");
+  if (!(events.length == 2)) console.error("didn't get the expected number of events");
+}
+function printTimings_(times, prefix) {
+  const total = times.reduce((p, t) => p + t, 0);
+  const avg = total / times.length;
+  const max = times.reduce((p, t) => p >= t ? p : t, 0);
+  const min = times.reduce((p, t) => p <= t ? p : t, 10000);
+  console.log(`${prefix ? prefix + " -" : ""} Average: ${avg} min: ${min} max: ${max}, total: ${total}`);
 }
 function testEditEvents() {
   const NUMTESTS = 1;
@@ -99,7 +107,7 @@ function testEditEvents() {
 
   function createEventEditObjects(urls) {
     let rwgpsEvents = rwgpsService.getAll(urls).map(resp => JSON.parse(resp.getContentText()));
-    let events = rwgpsEvents.map(e => EventFactory.fromRwgpsEvent(e));
+    let events = rwgpsEvents.map(e => eventFactory.fromRwgpsEvent(e));
     let eventEditObjects = events.map((e, i) => { return { event: e, url: urls[i] } });
     return eventEditObjects;
   }
@@ -125,21 +133,20 @@ function testGetAll() {
     return new Date() - start;
   }
 
-  const rwgpsService = new RWGPSService(Credentials.username, Credentials.password, Globals);
-  const events = ['https://ridewithgps.com/events/198070', 'https://ridewithgps.com/events/196909'];
+  const events = [ 'https://ridewithgps.com/events/196660-copied-event', 'https://ridewithgps.com/events/193587-copied-event' ];
   const urls = [];
   let timings = [];
   for (let i = 0; i < 100; i++) {
-    timings.push(timedGet(['https://ridewithgps.com/events/198070']))
+    timings.push(timedGet(events.slice(0, 1)))
   }
-  printTimings_(timings);
+  printTimings_(timings, "getAll");
 
   for (let i = 0; i < 100; i++) {
     urls.push(events[0]);
   }
   timings = [];
   timings.push(timedGet(urls))
-  printTimings_(timings);
+  printTimings_(timings, "getAll");
 }
 //------------------------------
 // function testEditNameOnly() {
@@ -288,7 +295,7 @@ function testLookupOrganizer() {
 }
 
 function testGetRSVPObject() {
-  
+
 
   const id = 215744
   let rwgps = new RWGPS(new RWGPSService(Credentials.username, Credentials.password, Globals));

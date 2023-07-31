@@ -25,21 +25,31 @@ class RWGPS {
     }
     if (isNaN(event_id)) {
       console.log(`RWGPS.getRSVPObject(${event_id}) has been called with a non-number argument`);
-      return { name: `I was expecting a numeric event id but got this: ${event_id}`, participants: []}
+      return { name: `I was expecting a numeric event id but got this: ${event_id}`, participants: [] }
     }
     try {
       return this.getRSVPObjectByURL(this.globals.EVENTS_URI + event_id)
     } catch (e) {
       Logger.log(e)
-      return { name: `No such event: ${event_id}`, participants: []}
+      return { name: `No such event: ${event_id}`, participants: [] }
     }
   }
+  /**
+   * @typedef {Object} rsvpObject
+   * @property {String} name
+   * @property {String[]} participants
+   */
+  /**
+   * 
+   * @param {URL} e_url Url of an event
+   * @returns {rsvpObject}
+   */
   getRSVPObjectByURL(e_url) {
     const globals = this.globals;
     function getEventName(response) {
       if (response.getResponseCode() !== 200) {
         console.log(`Response code: ${response.getResponseCode()} body: ${response.getContentText()}`)
-        return JSON.parse(response.getContentText()).status
+        return "No event found"
       }
       return JSON.parse(response.getContentText())["event"]["name"]
     }
@@ -52,7 +62,7 @@ class RWGPS {
       const json = JSON.parse(body);
       return json.filter(p => {
         return p.rsvp_status.toLowerCase() === "yes" && (p.first_name || p.last_name)
-      }).map(p => { return { first_name: p.first_name ? p.first_name.trim() : p.first_name, last_name: p.last_name ? p.last_name.trim() : p.last_name} })
+      }).map(p => { return { first_name: p.first_name ? p.first_name.trim() : p.first_name, last_name: p.last_name ? p.last_name.trim() : p.last_name } })
     }
     function getLeaders(response) {
       if (response.getResponseCode() !== 200) {
@@ -74,26 +84,33 @@ class RWGPS {
     }
     const p_url = e_url + "/participants.json";
     const o_url = e_url + "/organizer_ids.json";
-    const responses = this.rwgpsService.getAll([e_url, p_url, o_url], { muteHttpExceptions: false })
-    let participants = getParticipants(responses[1]);
-    const leaders = getLeaders(responses[2]);
-    participants.forEach(p => {
-      const li = leaders.findIndex(l => {
-        return compareNames(l, p) === 0;
-      });
-      if (li !== -1) {
-        p.leader = true;
-        leaders.splice(li, 1)
-      }
-    })
-    participants = [...participants, ...leaders].sort(compareNames)
+    let responses;
+    try {
+      responses = this.rwgpsService.getAll([e_url, p_url, o_url], { muteHttpExceptions: false })
+      let participants = getParticipants(responses[1]);
+      const leaders = getLeaders(responses[2]);
+      participants.forEach(p => {
+        const li = leaders.findIndex(l => {
+          return compareNames(l, p) === 0;
+        });
+        if (li !== -1) {
+          p.leader = true;
+          leaders.splice(li, 1)
+        }
+      })
+      participants = [...participants, ...leaders].sort(compareNames)
 
-    const rsvpObject = {
-      name: getEventName(responses[0]),
-      participants: participants
+      const rsvpObject = {
+        name: getEventName(responses[0]),
+        participants: participants
+      }
+      return rsvpObject
     }
-    return rsvpObject
+    catch (e) {
+      console.warn(`${e.message} - original URL: ${e_url}`)
+      return { name: "No Event Found", participants: [] }
   }
+}
 
 
   /**
@@ -673,7 +690,7 @@ class RWGPSService {
           Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
         },
         followRedirects: false,
-        muteHttpExceptions: true,
+        muteHttpExceptions: false,
         ...override
       };
       return r;
@@ -709,13 +726,7 @@ if (typeof module !== 'undefined') {
   module.exports = { RWGPS, RWGPSService }
 }
 
-function printTimings_(times, prefix) {
-  const total = times.reduce((p, t) => p + t, 0);
-  const avg = total / times.length;
-  const max = times.reduce((p, t) => p >= t ? p : t, 0);
-  const min = times.reduce((p, t) => p <= t ? p : t, 10000);
-  console.log(`${prefix} - Average: ${avg} min: ${min} max: ${max}, total: ${total}`);
-}
+
 
 
 if (typeof module !== 'undefined') {
