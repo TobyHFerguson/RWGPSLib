@@ -18,6 +18,11 @@ class RWGPS {
     this.globals = rwgpsService.globals;
     this.rwgpsService = rwgpsService;
   }
+  /**
+   * get the RSVP Object given an event id
+   * @param {number} event_id the id of the event
+   * @returns {RSVPObject} the rsvp object that represents this event's participants
+   */
   getRSVPObject(event_id) {
     if (!event_id) {
       console.log(`RWGPS.getRSVPObject(${event_id}) with no event_id`)
@@ -35,14 +40,20 @@ class RWGPS {
     }
   }
   /**
-   * @typedef {Object} rsvpObject
-   * @property {String} name
-   * @property {String[]} participants
+   * @typedef {Object} Participant
+   * @param {String} first_name
+   * @param {String} last_name
+   * @param {boolean} [leader] true iff this participant is a leader for the containing event
    */
   /**
-   * 
+   * @typedef {Object} RSVPObject
+   * @property {String} name name of the event
+   * @property {Participant[]} participants
+   */
+  /**
+   * Get the RSVP Object that corresponds to the event at the given url
    * @param {URL} e_url Url of an event
-   * @returns {rsvpObject}
+   * @returns {RSVPObject} the rsvp object that represents the given event
    */
   getRSVPObjectByURL(e_url) {
     const globals = this.globals;
