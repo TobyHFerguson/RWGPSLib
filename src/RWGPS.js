@@ -71,10 +71,20 @@ class RWGPS {
       }
       const body = response.getContentText();
       const json = JSON.parse(body);
-      return json.filter(p => {
-        return p.rsvp_status.toLowerCase() === "yes" && (p.first_name || p.last_name)
-      }).map(p => { return { first_name: p.first_name ? p.first_name.trim() : p.first_name, last_name: p.last_name ? p.last_name.trim() : p.last_name } })
+      return json.filter(p => 
+        (p.rsvp_status.toLowerCase() === "yes") && (p.first_name || p.last_name)
+      )
     }
+    /**
+     * @typedef {Object} Organizer
+     * @param{number} id
+     * @param{string} text
+     */
+    /**
+     * 
+     * @param {*} response 
+     * @returns {Organizer[]}
+     */
     function getLeaders(response) {
       if (response.getResponseCode() !== 200) {
         Logger.log(`Response code: ${response.getResponseCode()} body: ${response.getContentText()}`)
@@ -84,7 +94,7 @@ class RWGPS {
       const json = JSON.parse(body);
       return json.filter(o => o.id !== globals.RIDE_LEADER_TBD_ID).map(o => {
         const n = o.text.trim().split(/\s+/)
-        return { first_name: n[0], last_name: n.length > 1 ? n[1] : '', leader: true }
+        return { user_id: o.id, first_name: n[0], last_name: n.length > 1 ? n[1] : '', leader: true }
       })
     }
     function compareNames(l, r) {
@@ -102,7 +112,7 @@ class RWGPS {
       const leaders = getLeaders(responses[2]);
       participants.forEach(p => {
         const li = leaders.findIndex(l => {
-          return compareNames(l, p) === 0;
+          return l.user_id === p.user_id;
         });
         if (li !== -1) {
           p.leader = true;
