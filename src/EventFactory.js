@@ -1,5 +1,4 @@
 if (typeof require !== 'undefined') {
-    dates = require('./dates.js');
     Event = require('./Event.js')
 }
 function EventFactory(Globals) {

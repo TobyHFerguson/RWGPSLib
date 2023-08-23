@@ -97,9 +97,15 @@ class RWGPS {
         return { user_id: o.id, first_name: n[0], last_name: n.length > 1 ? n[1] : '', leader: true }
       })
     }
-    function compareNames(l, r) {
-      const a = (l.last_name + l.first_name).toLowerCase()
-      const b = (r.last_name + r.first_name).toLowerCase()
+    function compareParticipants(l, r) {
+      function flatten(p) {
+        function z(v) { return v ? v : 'zzzzz'}
+        let f = z(p.last_name) + z(p.first_name)
+          return f.toLowerCase();
+      }
+      
+      const a = flatten(l)
+      const b = flatten(r)
       const result = a < b ? -1 : a > b ? 1 : 0
       return result;
     }
@@ -119,7 +125,7 @@ class RWGPS {
           leaders.splice(li, 1)
         }
       })
-      participants = [...participants, ...leaders].sort(compareNames)
+      participants = [...participants, ...leaders].toSorted(compareParticipants)
 
       const rsvpObject = {
         name: getEventName(responses[0]),

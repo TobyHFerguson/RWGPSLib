@@ -1,7 +1,3 @@
-if (typeof require !== 'undefined') {
-    dates = require('./dates.js');
-  }
-  
   // Managed names can be of the form:
   // Mon A 1/1 10:00 AM Ride route name
   // Mon A 1/1 10:00 route name

@@ -2,7 +2,6 @@ var should = require('chai').should();
 const sinon = require('sinon');
 const managedEvent = require('./fixtures/MyPayload.js')
 const EventFactory = require('../src/EventFactory.js');
-const dates = require('../src/dates.js')
 const managedRwgpsEvent = require('./fixtures/event.json').event;
 const organizers = [{ id: 302732, text: "Toby Ferguson" }];
 
