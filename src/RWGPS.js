@@ -339,16 +339,17 @@ class RWGPS {
   }
 
   /**
-   * @typedef ForeignRoute
+   * @typedef Route
    * @type {Object}
    * @property {string} url - the foreign route's url
    * @property {Number} [visibility = 0] - the visibility to set the imported route to. Defaults to 0 (Public)
    * @property {string} [name] - the name of the imported route. Defaults to the foreign route's name.
    * @property {Date} [expiry] - date that the imported route should be expired.
+   * @property {string[]} [tags] - tags to be added to the imported route
    */
   /**
    * Import a route from a foreign route URL into the club library
-   * @param {string |ForeignRoute} route - the foreign route url or object
+   * @param {Route} route - the foreign route url or object
    * @returns {string} url - the url of the new route in the club library
    * @throws Exception if the import fails for any reason.
    */
@@ -363,7 +364,8 @@ class RWGPS {
     const response = this.rwgpsService.importRoute(fr);
     const body = JSON.parse(response.getContentText());
     if (body.success) {
-      this.setRouteExpiration(body.url, fr.expiry);
+      let localRoute = { ...fr, url: body.url }
+      this.setRouteExpiration(localRoute);
     }
     return body.url;
   }
@@ -379,13 +381,12 @@ class RWGPS {
 
   /**
    * Set the expiration date of the given route to the latter of the route's current expiration date or its new one
-   * @param {string} route_url - the url of the route whose expiration is to be set
-   * @param {(string | Date)} [expiration_date] - the expiration date. No date removes the expiration date from the route.
+   * @param {Route} localRoute - the url of the route whose expiration is to be set
    * @param {NumberLike} [extend_only = false] - When true only update the expiration if there's already an expiration date. If there's not then do nothing. When false then add the expiration regardless.
    * @returns {object} returns this for chaining
    */
-  setRouteExpiration(route_url, expiration_date, extend_only = false) {
-    if (!route_url) {
+  setRouteExpiration(localRoute, extend_only = false) {
+    if (!localRoute.url) {
       return this;
     }
     const self = this;
@@ -396,7 +397,7 @@ class RWGPS {
         return route.tag_names[ix]
       }
     }
-    function deleteExpirationTag() {
+    function deleteExpirationTag(route_url) {
       const etag = findExpirationTag(route_url);
       if (etag) {
         const id = route_url.split('/')[4].split('-')[0];
@@ -409,27 +410,28 @@ class RWGPS {
     function makeExpirationTag(date) {
       return `expires: ${dates.MMDDYYYY(date)}`
     }
-
-    if (!expiration_date) {
-      deleteExpirationTag(route_url);
+    if (!localRoute.expiry) {
+      deleteExpirationTag(localRoute.url);
     } else {
+      localRoute.tags = [...(localRoute.tags || [])]
+      localRoute.tags.push(makeExpirationTag(localRoute.expiry));
       // cet: Current Expiration Tag
-      const cet = findExpirationTag(route_url);
+      const cet = findExpirationTag(localRoute.url);
       if (!cet) { // No expiration tag
         if (extend_only) {
           // no-op! We've not got an expiration date but we've been told only to extend!
         } else {
           // No expiration date, but we're not extending, so add a new tag
-          const id = route_url.split('/')[4].split('-')[0];
-          this.rwgpsService.tagRoutes([id], [makeExpirationTag(expiration_date)]);
+          const id = localRoute.url.split('/')[4].split('-')[0];
+          this.rwgpsService.tagRoutes([id], localRoute.tags);
         }
       } else {
         // we have an expiration tag; extend_only doesn't matter here; We'll replace the tag.
         const ced = getExpirationDate(cet);
-        if (dates.compare(ced, expiration_date) < 0) {
+        if (dates.compare(ced, localRoute.expiry) < 0) {
           const id = route_url.split('/')[4].split('-')[0];
           this.rwgpsService.unTagRoutes([id], [cet]);
-          this.rwgpsService.tagRoutes([id], [makeExpirationTag(expiration_date)]);
+          this.rwgpsService.tagRoutes([id], localRoute.tags);
         }
       }
     }
