@@ -4,8 +4,33 @@ class RWGPSService {
         this.globals = globals;
         this.apiService.login();
     }
+    _send_request(url, options) {
+        options.headers = { ...options.headers, 'cookie': this.apiService.webSessionCookie };
+        console.log('Sending request to URL:', url);
+        console.log('With options:', options);
+        const response = UrlFetchApp.fetch(url, options);
+        return response;
+    }
+    getRoute(id) {
+        const url = `https://ridewithgps.com/routes/${id}.json`;
+        return this.apiService.fetchPublicData(url);
+    }
     /**
-     * 
+     * Delete a single route by url
+     * @param {string} id - the id of the route to delete
+     * @returns {object} the response object
+     */
+    deleteRoute(id) {
+        const url = `https://ridewithgps.com/api/v1/routes/${id}.json`;
+        const options = {
+            method: 'delete',
+            followRedirects: false,
+            muteHttpExceptions: false
+        }
+        return this.apiService.fetchClubData(url, options);
+    }
+    /**
+     * Import a foreign route
      * @param {ForeignRoute} routeObject - the foreign route object to be imported
      * @return {string} the url of the imported route
      */
@@ -19,13 +44,6 @@ class RWGPSService {
             ...routeObject
         }
         const options = {
-            method: 'post',
-            headers: {
-                cookie: this.cookie,
-                Accept: 'application/json'
-            },
-            followRedirects: false,
-            muteHttpExceptions: false,
             payload: payload
         }
         return this.apiService.fetchUserData(url, options);
@@ -75,7 +93,7 @@ class RWGPSService {
     }
 
     edit_event(event_url, event) {
-        let new_event = this.key_filter(event, CANONICAL_EVENT);
+        let new_event = this.key_filter(event, this.globals.CANONICAL_EVENT);
         const options = {
             method: 'put',
             contentType: 'application/json',
@@ -223,7 +241,7 @@ class RWGPSService {
     edit_events(eventEditObjects) {
         const self = this;
         function createRequest(eventEditObject) {
-            let new_event = self.key_filter(eventEditObject.event, CANONICAL_EVENT);
+            let new_event = self.key_filter(eventEditObject.event, this.globals.CANONICAL_EVENT);
             const request = {
                 url: eventEditObject.url,
                 method: 'put',
