@@ -11,7 +11,6 @@ class ApiService {
 
     // A private helper method to prepare a single request with proper headers.
     _prepareRequest(request, authType) {
-        console.log('Preparing request from:', request);
         let headers = request.headers || {};
         headers['Accept'] = headers['Accept'] || 'application/json';
 
@@ -67,7 +66,6 @@ class ApiService {
             const headers = response.getAllHeaders();
             const setCookieHeader = Array.isArray(headers['Set-Cookie']) ? headers['Set-Cookie'][0] : headers['Set-Cookie'];
             this.webSessionCookie = setCookieHeader.split(';')[0];
-            console.log(`Login successful! Cookie received: ${this.webSessionCookie}`);
             return true;
         } catch (e) {
             console.log(`Login request failed: ${e.message}`);
@@ -95,8 +93,6 @@ class ApiService {
             const url = `${endpoint}`;
             const request = this._prepareRequest({ url, ...options }, authType);
             const { url: _url, ...requestWithoutUrl } = request;
-            console.log('Single Request:', request);
-            console.log('Request without URL:', requestWithoutUrl);
             return UrlFetchApp.fetch(_url, requestWithoutUrl);
         }
     }
