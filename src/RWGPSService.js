@@ -71,7 +71,7 @@ class RWGPSService {
      * @returns {object} the response object
      */
     get(url) {
-        return this.apiService.fetchPublicData(url, options);
+        return this.apiService.fetchPublicData(url);
     }
 
     edit_event(event_url, event) {
