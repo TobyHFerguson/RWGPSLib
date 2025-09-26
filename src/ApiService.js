@@ -9,10 +9,9 @@ class ApiService {
         this.webSessionCookie = null;
     }
 
-    // A private helper method to prepare a single request with proper headers.
+    // A private helper method to prepare a single request with proper method and authentication headers.
     _prepareRequest(request, authType) {
         let headers = request.headers || {};
-        headers['Accept'] = headers['Accept'] || 'application/json';
 
         // Automatically set the method based on the presence of a payload
         if (request.payload && !request.method) {
@@ -34,11 +33,6 @@ class ApiService {
                 const encodedAuth = Utilities.base64Encode(`${apiKey}:${authToken}`);
                 headers['Authorization'] = `Basic ${encodedAuth}`;
             }
-        }
-
-        if (request.payload && !headers['Content-Type']) {
-            headers['Content-Type'] = 'application/json';
-            request.payload = JSON.stringify(request.payload);
         }
 
         request.headers = headers;

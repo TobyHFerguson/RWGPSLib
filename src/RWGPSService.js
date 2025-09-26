@@ -62,10 +62,8 @@ class RWGPSService {
         return no;
     }
 
-
-
     copy_template_(template_url) {
-        const url = template_url + "/copy";
+        const url = template_url + "/copy"; // not JSON - need to get the html redirect
         const payload = {
             'event[name]': "COPIED EVENT",
             'event[all_day]': "0",
@@ -74,11 +72,8 @@ class RWGPSService {
             'event[start_time]': ""
         }
         const options = {
-            method: 'post',
-            headers: { 'cookie': this.cookie },
-            followRedirects: false,
-            muteHttpExceptions: false,
-            payload: payload
+            payload: payload,
+            followRedirects: false, // important to get the 302 redirect
         }
         return this.apiService.fetchUserData(url, options);
     }

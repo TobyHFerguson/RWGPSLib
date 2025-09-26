@@ -48,8 +48,23 @@ function RWGPSServiceSmokeTest() {
         }
     }
     
+    function testCopyTemplate() {
+        console.log('\n--- Test: copyTemplate() ---');
+        const ATemplate = 'https://ridewithgps.com/events/186557-a-template'
+        try {
+            const copyResp = rwgpsService.copy_template_(ATemplate);
+            console.log('copy_template_ called with this.apiService.fetchUserData()');
+            console.log('copy_template_ response code:', copyResp.getResponseCode());
+            console.log('copy_template_() response:', copyResp.getContentText());
+            console.log('copy_template_ response headers.Location:', copyResp.getAllHeaders().Location);
+        } catch (error) {
+            console.error('copy_template_() error:', error);
+        }
+    }
+
     testGetRoute();
     // testDeleteRoute() - this gets executed in testImportRoute()
     testImportRoute();
+    testCopyTemplate();
     console.log('---- RWGPSService smoke tests completed ----');
 }
