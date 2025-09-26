@@ -31,7 +31,7 @@ class ApiService {
             } else if (authType === 'BASIC_AUTH') {
                 const apiKey = this.credentialManager.getApiKey();
                 const authToken = this.credentialManager.getAuthToken();
-                const encodedAuth = Utilities.base64Encode(`${authToken}:${apiKey}`);
+                const encodedAuth = Utilities.base64Encode(`${apiKey}:${authToken}`);
                 headers['Authorization'] = `Basic ${encodedAuth}`;
             }
         }
@@ -73,6 +73,14 @@ class ApiService {
         }
     }
 
+    // Internal fetch — always resolves to UrlFetchApp calls for Step 1
+    _doFetch(requests) {
+        if (Array.isArray(requests)) {
+            return UrlFetchApp.fetchAll(requests);
+        }
+        const { url, ...opts } = requests;
+        return UrlFetchApp.fetch(url, opts);
+    }
     /**
      * A single, powerful fetch method that handles both individual and batch requests.
      *
@@ -87,13 +95,11 @@ class ApiService {
                 const finalRequest = { ...request, ...options };
                 return this._prepareRequest(finalRequest, authType);
             });
-            console.log('Processed Requests:', processedRequests);
-            return UrlFetchApp.fetchAll(processedRequests);
+            return this._doFetch(processedRequests);
         } else {
             const url = `${endpoint}`;
             const request = this._prepareRequest({ url, ...options }, authType);
-            const { url: _url, ...requestWithoutUrl } = request;
-            return UrlFetchApp.fetch(_url, requestWithoutUrl);
+            return this._doFetch(request);
         }
     }
 
@@ -120,44 +126,75 @@ class ApiService {
         return this._fetch(endpoint, options, 'BASIC_AUTH');
     }
 
+    /**
+     * Fetches public data without authentication. Handles both single and batch requests.
+     * @param {string|Array<Object>} endpoint
+     * @param {Object} [options={}] an options object to be applied to all requests
+     * @returns {UrlFetchApp.HTTPResponse|Array<UrlFetchApp.HTTPResponse>}
+     */
     fetchPublicData(endpoint, options = {}) {
         return this._fetch(endpoint, options, null);
     }
 }
 
-// Example usage
-function myFunction() {
-    const api = new ApiService();
 
-    // Example of making a web session call
+/**
+ * Minimal smoke tests for ApiService stabilization step.
+ */
+function smokeTest_ApiService() {
+    const scriptProperties = PropertiesService.getScriptProperties();
+    const creds = new CredentialManager(scriptProperties);
+    const api = new ApiService(creds);
+
+    // 1. Test login + web session fetch
     try {
-        api.login();
-        const userDataResponse = api.fetchUserData('/profile');
-        Logger.log('User data: ' + userDataResponse.getContentText());
+        Logger.log('--- Test: WEB_SESSION ---');
+        if (api.login()) {
+            const resp = api.fetchUserData('https://ridewithgps.com/events/186234.json');
+            Logger.log('WEB_SESSION success: ' + resp.getResponseCode());
+            Logger.log(resp.getContentText().substring(0, 200)); // show first 200 chars
+        } else {
+            Logger.log('WEB_SESSION login failed.');
+        }
     } catch (e) {
-        Logger.log('Web session failed: ' + e.message);
+        Logger.log('WEB_SESSION error: ' + e.message);
     }
 
-    // Example of using gasFetchAll to make multiple calls at once
+    // 2. Test Basic Auth fetch
     try {
-        const requests = [
-            {
-                url: 'https://public-api.com/leaderboard',
-                options: { 'method': 'get' },
-                authType: 'BASIC_AUTH'
-            },
-            {
-                url: 'https://public-api.com/events',
-                options: { 'method': 'get' },
-                authType: 'BASIC_AUTH'
-            }
-        ];
+        Logger.log('--- Test: BASIC_AUTH ---');
+        const resp = api.fetchClubData('https://ridewithgps.com/api/v1/events/398589.json');
+        Logger.log('BASIC_AUTH success: ' + resp.getResponseCode());
+        Logger.log(resp.getContentText().substring(0, 200));
+    } catch (e) {
+        Logger.log('BASIC_AUTH error: ' + e.message);
+    }
 
-        const responses = api.gasFetchAll(requests);
-        responses.forEach((response, index) => {
-            Logger.log(`Response ${index + 1}: ` + response.getContentText());
+    // 3. Test Public fetch
+    try {
+        Logger.log('--- Test: PUBLIC ---');
+        const resp = api.fetchPublicData('https://ridewithgps.com/events/398589.json');
+        Logger.log('PUBLIC success: ' + resp.getResponseCode());
+        Logger.log(resp.getContentText().substring(0, 200));
+    } catch (e) {
+        Logger.log('PUBLIC error: ' + e.message);
+    }
+
+    // 4. Test Batch fetch (Basic Auth as an example)
+    try {
+        Logger.log('--- Test: BATCH ---');
+        const requests = [
+            { url: 'https://ridewithgps.com/api/v1/events/186557.json' },
+            { url: 'https://ridewithgps.com/api/v1/events/186234.json' }
+        ];
+        const resps = api.fetchClubData(requests);
+        resps.forEach((resp, i) => {
+            Logger.log(`Batch[${i}] code: ` + resp.getResponseCode());
+            Logger.log(resp.getContentText().substring(0, 200));
         });
     } catch (e) {
-        Logger.log('Batch API call failed: ' + e.message);
+        Logger.log('BATCH error: ' + e.message);
     }
+
+    Logger.log('--- Smoke test finished ---');
 }
