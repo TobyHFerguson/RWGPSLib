@@ -34,7 +34,7 @@ function RWGPSServiceSmokeTest() {
         }
     }
 
-    
+
     function testGetRoute() {
         console.log('\n--- Test: getRoute() ---');
         const id = 49027962; // Dummy route ID
@@ -47,7 +47,7 @@ function RWGPSServiceSmokeTest() {
             console.error('getRoute() error:', error);
         }
     }
-    
+
     function testCopyTemplate() {
         console.log('\n--- Test: copyTemplate() ---');
         const ATemplate = 'https://ridewithgps.com/events/186557-a-template'
@@ -57,14 +57,27 @@ function RWGPSServiceSmokeTest() {
             console.log('copy_template_ response code:', copyResp.getResponseCode());
             console.log('copy_template_() response:', copyResp.getContentText());
             console.log('copy_template_ response headers.Location:', copyResp.getAllHeaders().Location);
+            testDeleteEvent(copyResp.getAllHeaders().Location)
         } catch (error) {
             console.error('copy_template_() error:', error);
         }
     }
 
+    function testDeleteEvent(eventId) {
+        console.log('\n--- Test: deleteEvent() ---');
+        try {
+            const deleteResp = rwgpsService.deleteEvent(eventId);
+            console.log('deleteEvent called with apiService.fetchClubData()');
+            console.log('deleteEvent response code:', deleteResp.getResponseCode());
+            console.log('deleteEvent() response:', deleteResp.getContentText());
+        } catch (error) {
+            console.error('deleteEvent() error:', error);
+        }
+    }
     testGetRoute();
     // testDeleteRoute() - this gets executed in testImportRoute()
     testImportRoute();
     testCopyTemplate();
+    // testDeleteEvent() - this gets executed in testCopyTemplate()
     console.log('---- RWGPSService smoke tests completed ----');
 }

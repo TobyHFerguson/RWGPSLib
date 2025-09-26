@@ -49,6 +49,16 @@ class RWGPSService {
         return this.apiService.fetchUserData(url, options);
     }
     /**
+     * Extract ID from a RWGPS URL
+     * @param {string} url - URL like "https://ridewithgps.com/events/403834-copied-event"
+     * @return {string} the ID extracted from the URL (e.g., "403834")
+     */
+    extractIdFromUrl(url) {
+        const match = url.match(/\/(\d+)(-|$)/);
+        return match ? match[1] : null;
+    }
+
+    /**
   * Select the keys and values of the left object where every key in the left is in the right
   * @param{left} object
   * @param{right} object
@@ -78,6 +88,17 @@ class RWGPSService {
         return this.apiService.fetchUserData(url, options);
     }
 
+    deleteEvent(event_url) {
+        const id = this.extractIdFromUrl(event_url);
+        if (!id) {
+            throw new Error(`Invalid event URL: ${event_url}`);
+        }
+        const url = `https://ridewithgps.com/api/v1/events/${id}.json`
+        const options = {
+            method: 'delete',
+        }
+        return this.apiService.fetchClubData(url, options);
+    }
     /**
      * GET the given url
      * @param {string} url - the url whose resource is to be fetched
