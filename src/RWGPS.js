@@ -2,14 +2,20 @@ function DEBUG_(message) {
   Logger.log(`DEBUG: ${message}`);
 }
 
-function newRWGPSService(email, password, globals) {
-  return new RWGPSService(email, password, globals)
+function newRWGPSService(globals, credentialManager) {
+  const apiService = new ApiService(credentialManager)
+  const rwgpsService = new RWGPSService(apiService, globals);
+  return rwgpsService;
 }
 
 function newRWGPS(rwgpsService) {
-  return new RWGPS(rwgpsService);
+  const rwgps = new RWGPS(rwgpsService);
+  return rwgps;
 }
 
+function newCredentialManager(scriptProperties) {
+  return new CredentialManager(scriptProperties);
+}
 /**
  * Class RWGPS represents the services that are obtained by using event urls
  */
@@ -71,7 +77,7 @@ class RWGPS {
       }
       const body = response.getContentText();
       const json = JSON.parse(body);
-      return json.filter(p => 
+      return json.filter(p =>
         (p.rsvp_status.toLowerCase() === "yes") && (p.first_name || p.last_name)
       )
     }
@@ -99,11 +105,11 @@ class RWGPS {
     }
     function compareParticipants(l, r) {
       function flatten(p) {
-        function z(v) { return v ? v : 'zzzzz'}
+        function z(v) { return v ? v : 'zzzzz' }
         let f = z(p.last_name) + z(p.first_name)
-          return f.toLowerCase();
+        return f.toLowerCase();
       }
-      
+
       const a = flatten(l)
       const b = flatten(r)
       const result = a < b ? -1 : a > b ? 1 : 0
