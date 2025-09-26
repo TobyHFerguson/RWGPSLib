@@ -13,7 +13,7 @@ class ApiService {
     _prepareRequest(request, authType) {
         console.log('Preparing request from:', request);
         let headers = request.headers || {};
-        
+        headers['Accept'] = headers['Accept'] || 'application/json';
 
         // Automatically set the method based on the presence of a payload
         if (request.payload && !request.method) {
@@ -41,6 +41,7 @@ class ApiService {
             headers['Content-Type'] = 'application/json';
         }
 
+        request.headers = headers;
         return {
             ...request
         };

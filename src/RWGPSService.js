@@ -213,20 +213,11 @@ class RWGPSService {
         const requests = urls.map(url => {
             let r = {
                 url,
-                method: 'get',
-                headers: {
-                    // cookie: this.apiService.webSessionCookie,
-                    Accept: "application/json",
-                },
-                followRedirects: false,
-                muteHttpExceptions: false,
-                ...override
             };
             return r;
         })
         console.log('Requests are:', requests);
         return this.apiService.fetchUserData(requests);
-        // return UrlFetchApp.fetchAll(requests);
     }
 
     edit_events(eventEditObjects) {
