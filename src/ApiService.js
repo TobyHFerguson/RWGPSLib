@@ -38,6 +38,7 @@ class ApiService {
 
         if (request.payload && !headers['Content-Type']) {
             headers['Content-Type'] = 'application/json';
+            request.payload = JSON.stringify(request.payload);
         }
 
         request.headers = headers;
@@ -79,6 +80,8 @@ class ApiService {
             return UrlFetchApp.fetchAll(requests);
         }
         const { url, ...opts } = requests;
+        console.log('Fetching URL:', url);
+        console.log('With options:', opts);
         return UrlFetchApp.fetch(url, opts);
     }
     /**
