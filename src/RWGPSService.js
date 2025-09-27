@@ -117,16 +117,24 @@ class RWGPSService {
 
     /**
      * 
-     * @param {number} url 
-     * @returns {Object}event object
+     * @param {number} url - public event URL
+     * @returns {Object} event object as per https://github.com/ridewithgps/developers/blob/master/endpoints/events.md#get-apiv1eventsidjson
      */
     getEvent(url) {
+        //TODO - validate url - it must be a public event url
         const id = this.extractIdFromUrl(url);
         const event_url = `https://ridewithgps.com/api/v1/events/${id}.json`;
         return this.apiService.fetchClubData(event_url);
     }
-
+    /**
+     * Edit an event
+     * @param {string} event_url - the public URL of the event to be edited
+     * @param {Object} event - the event object containing the updated details
+     * @returns {object} the response object
+     */
     edit_event(event_url, event) {
+        //TODO - validate event object
+        //TODO - validate event_url - it must be a public event url
         let new_event = this.key_filter(event, CANONICAL_EVENT);
         const options = {
             method: 'put',
@@ -137,20 +145,6 @@ class RWGPSService {
             },
             followRedirects: false,
             muteHttpExceptions: true
-        }
-        return this.apiService.fetchUserData(event_url, options);
-    }
-    round_trip(event_url, event) {
-        const options = {
-            method: 'put',
-            contentType: 'application/json',
-            payload: JSON.stringify(event),
-            headers: {
-                cookie: this.cookie,
-                Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
-            },
-            followRedirects: false,
-            muteHttpExceptions: false
         }
         return this.apiService.fetchUserData(event_url, options);
     }
