@@ -152,14 +152,12 @@ class RWGPSService {
     /**
      * Delete multiple events
      * @param{string[]} event_ids - an array containing the ids of the events to delete
+     * @returns {object} the response object which contains an array of the deleted events
      */
     batch_delete_events(event_ids) {
         let url = "https://ridewithgps.com/events/batch_destroy.json";
         const payload = { event_ids: event_ids.join() }
         const options = {
-            method: 'post',
-            headers: { 'cookie': this.cookie },
-            followRedirects: false,
             payload: payload
         }
         return this.apiService.fetchUserData(url, options);
