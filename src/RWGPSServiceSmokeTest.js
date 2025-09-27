@@ -125,6 +125,22 @@ function RWGPSServiceSmokeTest() {
         }
     } 
 
+    function testUntagEvents() {
+        console.log('\n--- Test: untagEvents() ---');
+        try {
+            const eventUrls = [rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location,
+            rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location];
+            const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
+            console.log('Event IDs to untag:', eventIds);
+            const untagResp = rwgpsService.unTagEvents(eventIds, ['template']);
+            console.log('unTagEvents called with this.apiService.fetchUserData()');
+            console.log(`unTagEvents code: ` + untagResp.getResponseCode());
+            console.log('unTagEvents() response:', untagResp.getContentText());
+            rwgpsService.batch_delete_events(eventIds);
+        } catch (error) {
+            console.error('unTagEvents() error:', error);
+        }
+    }
     // testGetRoute();
     // // testDeleteRoute() - this gets executed in testImportRoute()
     // testImportRoute();
@@ -132,6 +148,7 @@ function RWGPSServiceSmokeTest() {
     // // testDeleteEvent() - this gets executed in testCopyTemplate()
     // testEditEvent();
     // testBatchDeleteEvents();
-    testBatchDeleteRoutes();
+    // testBatchDeleteRoutes();
+    testUntagEvents()
     console.log('---- RWGPSService smoke tests completed ----');
 }

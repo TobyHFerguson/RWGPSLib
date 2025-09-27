@@ -188,9 +188,6 @@ class RWGPSService {
             const payload = { tag_action, tag_names: tags.join() };
             payload[`${resource}_ids`] = ids.join();
             const options = {
-                method: 'post',
-                headers: { 'cookie': this.cookie },
-                followRedirects: false,
                 payload: payload
             }
             return this.apiService.fetchUserData(url, options);
