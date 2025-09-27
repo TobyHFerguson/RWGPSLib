@@ -105,12 +105,33 @@ function RWGPSServiceSmokeTest() {
             console.error('batch_delete_events() error:', error);
         }
     }
+    function testBatchDeleteRoutes() {
+        console.log('\n--- Test: batchDeleteRoutes() ---');
+        try {
+            const routeIds = [rwgpsService.importRoute({
+                url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+                tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+            }), rwgpsService.importRoute({
+                url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+                tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+            })].map(resp => JSON.parse(resp.getContentText()).id);
+            console.log('Route IDs to delete:', routeIds);
+            const deleteResps = rwgpsService.batch_delete_routes(routeIds);
+            console.log('batch_delete_routes called with this.apiService.fetchUserData()');
+            console.log(`batch_delete_routes code: ` + deleteResps.getResponseCode());
+            console.log('batch_delete_routes() response:', deleteResps.getContentText());
+        } catch (error) {
+            console.error('batch_delete_routes() error:', error);
+        }
+    } 
+
     // testGetRoute();
     // // testDeleteRoute() - this gets executed in testImportRoute()
     // testImportRoute();
     // testCopyTemplate();
     // // testDeleteEvent() - this gets executed in testCopyTemplate()
     // testEditEvent();
-    testBatchDeleteEvents();
+    // testBatchDeleteEvents();
+    testBatchDeleteRoutes();
     console.log('---- RWGPSService smoke tests completed ----');
 }

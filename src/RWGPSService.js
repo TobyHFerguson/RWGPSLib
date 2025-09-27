@@ -171,10 +171,7 @@ class RWGPSService {
         let url = "https://ridewithgps.com/routes/batch_destroy.json";
         const payload = { route_ids: route_ids.join(',') }
         const options = {
-            method: 'post',
-            headers: { 'cookie': this.cookie },
-            followRedirects: false,
-            payload: payload
+           payload: payload
         }
         return this.apiService.fetchUserData(url, options);
     }
