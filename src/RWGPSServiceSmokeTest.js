@@ -63,10 +63,10 @@ function RWGPSServiceSmokeTest() {
         }
     }
 
-    function testDeleteEvent(eventId) {
+    function testDeleteEvent(eventUrl) {
         console.log('\n--- Test: deleteEvent() ---');
         try {
-            const deleteResp = rwgpsService.deleteEvent(eventId);
+            const deleteResp = rwgpsService.deleteEvent(eventUrl);
             console.log('deleteEvent called with apiService.fetchClubData()');
             console.log('deleteEvent response code:', deleteResp.getResponseCode());
             console.log('deleteEvent() response:', deleteResp.getContentText());
@@ -74,10 +74,26 @@ function RWGPSServiceSmokeTest() {
             console.error('deleteEvent() error:', error);
         }
     }
+
+    function testEditEvent() {
+        console.log('\n--- Test: edit_event() ---');
+        const response = rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template');
+        const newEventUrl = response.getAllHeaders().Location;
+        const newEvent = rwgpsService.getEvent(newEventUrl);
+        newEvent.name = "Updated Event Name";
+        newEvent.desc = "Updated description";
+
+        const updatedEventResponse = rwgpsService.edit_event(newEventUrl, newEvent);
+        console.log('edit_event called with this.apiService.fetchUserData()');
+        console.log('edit_event response code:', updatedEventResponse.getResponseCode());
+        console.log('edit_event() response:', updatedEventResponse.getContentText());
+        testDeleteEvent(newEventUrl);
+    }
     testGetRoute();
     // testDeleteRoute() - this gets executed in testImportRoute()
     testImportRoute();
     testCopyTemplate();
     // testDeleteEvent() - this gets executed in testCopyTemplate()
+    testEditEvent();
     console.log('---- RWGPSService smoke tests completed ----');
 }

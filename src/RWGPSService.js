@@ -72,6 +72,13 @@ class RWGPSService {
         return no;
     }
 
+    /**
+     * Copy an event template
+     * @param {string} template_url
+     * @returns {object} the response object
+     * 
+     * Note, the Location header of the response contains the URL of the new event
+     */
     copy_template_(template_url) {
         const url = template_url + "/copy"; // not JSON - need to get the html redirect
         const payload = {
@@ -108,14 +115,24 @@ class RWGPSService {
         return this.apiService.fetchPublicData(url);
     }
 
+    /**
+     * 
+     * @param {number} url 
+     * @returns {Object}event object
+     */
+    getEvent(url) {
+        const id = this.extractIdFromUrl(url);
+        const event_url = `https://ridewithgps.com/api/v1/events/${id}.json`;
+        return this.apiService.fetchClubData(event_url);
+    }
+
     edit_event(event_url, event) {
-        let new_event = this.key_filter(event, this.globals.CANONICAL_EVENT);
+        let new_event = this.key_filter(event, CANONICAL_EVENT);
         const options = {
             method: 'put',
             contentType: 'application/json',
             payload: JSON.stringify(new_event),
             headers: {
-                cookie: this.cookie,
                 Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
             },
             followRedirects: false,
@@ -257,7 +274,7 @@ class RWGPSService {
     edit_events(eventEditObjects) {
         const self = this;
         function createRequest(eventEditObject) {
-            let new_event = self.key_filter(eventEditObject.event, this.globals.CANONICAL_EVENT);
+            let new_event = self.key_filter(eventEditObject.event, CANONICAL_EVENT);
             const request = {
                 url: eventEditObject.url,
                 method: 'put',
@@ -277,3 +294,4 @@ class RWGPSService {
         return responses;
     }
 }
+
