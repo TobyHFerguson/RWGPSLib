@@ -119,6 +119,7 @@ class RWGPS {
     const o_url = e_url + "/organizer_ids.json";
     let responses;
     try {
+      // TODO: move batching logic into RWGPSService note.
       responses = this.rwgpsService.getAll([e_url, p_url, o_url], { muteHttpExceptions: false })
       let participants = getParticipants(responses[1]);
       const leaders = getLeaders(responses[2]);

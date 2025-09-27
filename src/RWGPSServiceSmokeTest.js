@@ -123,7 +123,7 @@ function RWGPSServiceSmokeTest() {
         } catch (error) {
             console.error('batch_delete_routes() error:', error);
         }
-    } 
+    }
 
     function testUntagEvents() {
         console.log('\n--- Test: untagEvents() ---');
@@ -154,6 +154,24 @@ function RWGPSServiceSmokeTest() {
         }
     }
 
+    function testGetAll() {
+        console.log('\n--- Test: getAll() ---');
+        try {
+            const urls = [
+                'https://ridewithgps.com/events/341643.json',
+                'https://ridewithgps.com/events/341643/participants.json',
+                'https://ridewithgps.com/events/341643/organizer_ids.json'
+            ];
+            console.log('getAll called with this.apiService.fetchUserData()');
+            const responses = rwgpsService.getAll(urls);
+            responses.forEach((resp, i) => {
+                console.log(`getAll[${i}] code: ` + resp.getResponseCode());
+                console.log(`getAll[${i}] response: ` + resp.getContentText());
+            });
+        } catch (error) {
+            console.error('getAll() error:', error);
+        }
+    }
     // Run tests
     // testGetRoute();
     // // testDeleteRoute() - this gets executed in testImportRoute()
@@ -164,6 +182,7 @@ function RWGPSServiceSmokeTest() {
     // testBatchDeleteEvents();
     // testBatchDeleteRoutes();
     // testUntagEvents()
-    testGetOrganizers();
+    // testGetOrganizers();
+    testGetAll();
     console.log('---- RWGPSService smoke tests completed ----');
-}
+    }
