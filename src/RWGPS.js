@@ -294,6 +294,7 @@ class RWGPS {
      * @returns {Organizer[]} one or more organizer objects
      */
   getOrganizers(names) {
+    //TODO - use the private table mechanism to get all users in one go.
     if (!names) return [];
     //convert the names into the organizer structure
     const organizers = names.map(name => this.lookupOrganizer(this.globals.A_TEMPLATE, name.trim()));

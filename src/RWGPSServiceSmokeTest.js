@@ -141,6 +141,20 @@ function RWGPSServiceSmokeTest() {
             console.error('unTagEvents() error:', error);
         }
     }
+
+    function testGetOrganizers() {
+        console.log('\n--- Test: getOrganizers() ---');
+        try {
+            const organizersResp = rwgpsService.getOrganizers('https://ridewithgps.com/events/343514', 'Peter Stanger');
+            console.log('getOrganizers called with this.apiService.fetchPublicData()');
+            console.log(`getOrganizers code: ` + organizersResp.getResponseCode());
+            console.log('getOrganizers() response:', organizersResp.getContentText());
+        } catch (error) {
+            console.error('getOrganizers() error:', error);
+        }
+    }
+
+    // Run tests
     // testGetRoute();
     // // testDeleteRoute() - this gets executed in testImportRoute()
     // testImportRoute();
@@ -149,6 +163,7 @@ function RWGPSServiceSmokeTest() {
     // testEditEvent();
     // testBatchDeleteEvents();
     // testBatchDeleteRoutes();
-    testUntagEvents()
+    // testUntagEvents()
+    testGetOrganizers();
     console.log('---- RWGPSService smoke tests completed ----');
 }

@@ -234,13 +234,18 @@ class RWGPSService {
         return this._batch_update_tags(route_ids, "remove", tags, 'route');
     }
 
+    /**
+     * Get organizer IDs for a specific event
+     * @param {string} url public event URL
+     * @param {string} organizer_name 
+     * @returns 
+     */
+    //TODO - use the private table mechanism to get all users in one go.
+    //TODO: get rid of organizer_name - not needed.
     getOrganizers(url, organizer_name) {
         url = `${url}/organizer_ids.json`;
         const payload = { term: organizer_name.split(' ')[0], page: 1 }
         const options = {
-            method: 'post',
-            headers: { 'cookie': this.cookie },
-            followRedirects: false,
             payload: payload
         }
         return this.apiService.fetchUserData(url, options);
