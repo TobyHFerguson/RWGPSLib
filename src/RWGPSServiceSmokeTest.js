@@ -19,6 +19,7 @@ function RWGPSServiceSmokeTest() {
     testGetEvent();
     testTagEvents();
     testTagRoutes();
+    testUntagRoutes();
     console.log('---- RWGPSService smoke tests completed ----');
 }
 function testDeleteRoute(id) {
@@ -260,6 +261,30 @@ function testTagRoutes() {
         rwgpsService.batch_delete_routes(routeUrls);
     } catch (error) {
         console.error('tagRoutes() error:', error);
+    }
+}
+
+function testUntagRoutes() {
+    const rwgpsService = getRWGPSService_();
+    console.log('\n--- Test: untagRoutes() ---');
+    try {
+        const routeUrls = [rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        }), rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        })].map(resp => JSON.parse(resp.getContentText()).url);
+        const routeIds = routeUrls.map(url => rwgpsService.extractIdFromUrl(url));
+        rwgpsService.tagRoutes(routeIds, ['test', 'template']);
+        console.log('Route IDs to untag:', routeIds);
+        const untagResp = rwgpsService.unTagRoutes(routeIds, ['template']);
+        console.log('unTagRoutes called with this.apiService.fetchUserData()');
+        console.log(`unTagRoutes code: ` + untagResp.getResponseCode());
+        console.log('unTagRoutes() response:', untagResp.getContentText());
+        rwgpsService.batch_delete_routes(routeUrls);
+    } catch (error) {
+        console.error('unTagRoutes() error:', error);
     }
 }
 
