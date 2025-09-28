@@ -126,13 +126,13 @@ function test_edit_events() {
         const response1 = rwgps.copy_template_(globals.A_TEMPLATE);
         const newEventUrl1 = response1;
         const newEvent1 = rwgps.get_event(newEventUrl1);
-        newEvent1.name = "Updated Event Name 1";
+        newEvent1.name = "DELETE ME 1";
         newEvent1.desc = "Updated description 1";
 
         const response2 = rwgps.copy_template_(globals.A_TEMPLATE);
         const newEventUrl2 = response2;
         const newEvent2 = rwgps.get_event(newEventUrl2);
-        newEvent2.name = "Updated Event Name 2";
+        newEvent2.name = "DELETE ME 2";
         newEvent2.desc = "Updated description 2";
 
         const eventEditObjects = [
