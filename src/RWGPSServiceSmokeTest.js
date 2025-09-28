@@ -126,15 +126,15 @@ function testBatchDeleteRoutes() {
     const rwgpsService = getRWGPSService_();
     console.log('\n--- Test: batchDeleteRoutes() ---');
     try {
-        const routeIds = [rwgpsService.importRoute({
+        const routeUrls = [rwgpsService.importRoute({
             url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
             tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
         }), rwgpsService.importRoute({
             url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
             tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
-        })].map(resp => JSON.parse(resp.getContentText()).id);
-        console.log('Route IDs to delete:', routeIds);
-        const deleteResps = rwgpsService.batch_delete_routes(routeIds);
+        })].map(resp => JSON.parse(resp.getContentText()).url);
+        console.log('Route URLs to delete:', routeUrls);
+        const deleteResps = rwgpsService.batch_delete_routes(routeUrls);
         console.log('batch_delete_routes called with this.apiService.fetchUserData()');
         console.log(`batch_delete_routes code: ` + deleteResps.getResponseCode());
         console.log('batch_delete_routes() response:', deleteResps.getContentText());

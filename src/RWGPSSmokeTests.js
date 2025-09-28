@@ -7,6 +7,10 @@ function main() {
     testGetRSVPObjectByUrl()
     testGetRSVPObject()
     testGetRSVPCounts()
+    test_edit_events()
+    test_importRoute()
+    test_batch_delete_routes()
+
 }
 
 function test_get_event() {
@@ -45,7 +49,7 @@ function test_copy_template() {
     try {
         const copyResp = rwgps.copy_template_(ATemplate);
         console.log('copy_template_ result is a Public Event URL:', copyResp);
-       
+
     } catch (error) {
         console.error('copy_template_() error:', error);
     }
@@ -64,7 +68,7 @@ function test_batch_delete_events() {
         console.log('Deleted event IDs:', deletedEventIds);
     } catch (error) {
         console.error('batch_delete_events() error:', error);
-    }   
+    }
 }
 
 function testGetRSVPObjectByUrl() {
@@ -96,7 +100,7 @@ function testGetRSVPObject() {
         });
     } catch (error) {
         console.error('getRSVPObject() error:', error);
-    }       
+    }
 }
 
 function testGetRSVPCounts() {
@@ -143,6 +147,57 @@ function test_edit_events() {
         });
     } catch (error) {
         console.error('edit_events() error:', error);
+    }
+}
+
+function test_importRoute() {
+    console.log('\n--- Test: import_route() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    let importedRouteUrl;
+    try {
+        const foreignRoute = {
+            url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
+            visibility: 0,
+            name: 'TEST ROUTE - DELETE ME',
+            expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+            tags: ['test', 'imported']
+        };
+        importedRouteUrl = rwgps.importRoute(foreignRoute);
+        console.log('Imported Route URL:', importedRouteUrl);
+    } catch (error) {
+        console.error('importRoute() error:', error);
+        console.log('Skipping deleteRoute() test due to importRoute() failure.');
+        return;
+    }
+}
+
+function test_batch_delete_routes() {
+    console.log('\n--- Test: batch_delete_routes() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const routeUrls = [rwgps.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
+            visibility: 0,
+            name: 'TEST ROUTE - DELETE ME',
+            expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+            tags: ['test', 'imported']
+        }),
+        rwgps.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
+            visibility: 0,
+            name: 'TEST ROUTE - DELETE ME',
+            expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            tags: ['test', 'imported']
+        })]
+        console.log('Route Urls to delete:', routeUrls);
+        const deleteResps = rwgps.batch_delete_routes(routeUrls);
+        console.log('batch_delete_routes response code:', deleteResps.getResponseCode());
+        const content = deleteResps.getContentText();
+        console.log('batch_delete_routes response content:', content);
+        const deletedRouteIds = JSON.parse(content).routes.map(r => r.id);
+        console.log('Deleted route IDs:', deletedRouteIds);
+    } catch (error) {
+        console.error('batch_delete_routes() error:', error);
     }
 }
 

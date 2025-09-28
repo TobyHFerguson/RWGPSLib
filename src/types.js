@@ -41,3 +41,13 @@
    * @property {PublicEventUrl} url - an event url
    * @property {Event} event - an Event
    */
+
+  /**
+   * @typedef Route
+   * @type {Object}
+   * @property {string} url - the foreign route's url
+   * @property {Number} [visibility = 0] - the visibility to set the imported route to. Defaults to 0 (Public)
+   * @property {string} [name] - the name of the imported route. Defaults to the foreign route's name.
+   * @property {Date} [expiry] - date that the imported route should be expired.
+   * @property {string[]} [tags] - tags to be added to the imported route
+   */

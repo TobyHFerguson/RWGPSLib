@@ -246,8 +246,7 @@ class RWGPS {
      * @throws Exception if there's an error
      */
   batch_delete_routes(route_urls) {
-    let event_ids = route_urls.map(e => e.split('/')[4].split('-')[0]);
-    return this.rwgpsService.batch_delete_routes(event_ids);
+    return this.rwgpsService.batch_delete_routes(route_urls);
   }
 
   /**
@@ -334,19 +333,11 @@ class RWGPS {
     return this.lookupOrganizer(this.globals.A_TEMPLATE, name).id !== this.globals.RIDE_LEADER_TBD_ID;
   }
 
-  /**
-   * @typedef Route
-   * @type {Object}
-   * @property {string} url - the foreign route's url
-   * @property {Number} [visibility = 0] - the visibility to set the imported route to. Defaults to 0 (Public)
-   * @property {string} [name] - the name of the imported route. Defaults to the foreign route's name.
-   * @property {Date} [expiry] - date that the imported route should be expired.
-   * @property {string[]} [tags] - tags to be added to the imported route
-   */
+  
   /**
    * Import a route from a foreign route URL into the club library
    * @param {Route} route - the foreign route url or object
-   * @returns {string} url - the url of the new route in the club library
+   * @returns {PublicRouteUrl} url - the url of the new route in the club library
    * @throws Exception if the import fails for any reason.
    */
   importRoute(route) {

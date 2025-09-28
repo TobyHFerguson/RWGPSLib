@@ -246,10 +246,15 @@ class RWGPSService {
 
     /**
      * Delete multiple routes
-     * @param{string[]} route_ids - an array containing the ids of the routes to delete
+     * @param {PublicRouteUrl[]} route_urls - an array containing the ids of the routes to delete
+     * @returns {HttpResponse} the response object which contains an array of the deleted routes
      */
     //TODO - take an array of public route URLs
-    batch_delete_routes(route_ids) {
+    batch_delete_routes(route_urls) {
+        if (!Array.isArray(route_urls) || route_urls.length === 0) {
+            throw new Error('Invalid route URLs');
+        }
+        const route_ids = route_urls.map(url => this.extractIdFromUrl(url));
         let url = "https://ridewithgps.com/routes/batch_destroy.json";
         const payload = { route_ids: route_ids.join(',') }
         const options = {
