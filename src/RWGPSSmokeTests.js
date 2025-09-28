@@ -79,14 +79,14 @@ function test_batch_delete_routes() {
             visibility: 0,
             name: 'TEST ROUTE - DELETE ME',
             expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-            tags: ['test', 'imported']
+            tags: ['test', 'imported', 'test_batch_delete']
         }),
         rwgps.importRoute({
             url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
             visibility: 0,
             name: 'TEST ROUTE - DELETE ME',
             expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            tags: ['test', 'imported']
+            tags: ['test', 'imported', 'test_batch_delete']
         })]
         console.log('Route Urls to delete:', routeUrls);
         const deleteResps = rwgps.batch_delete_routes(routeUrls);
@@ -107,6 +107,7 @@ function test_copy_template() {
     try {
         const copyResp = rwgps.copy_template_(ATemplate);
         console.log('copy_template_ result is a Public Event URL:', copyResp);
+        rwgps.batch_delete_events([copyResp]);
 
     } catch (error) {
         console.error('copy_template_() error:', error);
@@ -144,6 +145,7 @@ function test_edit_events() {
             console.log(`Edited Event[${i}] description:`, event.desc);
             console.log(`Edited Event[${i}] slug:`, event.slug);
         });
+        rwgps.batch_delete_events([newEventUrl1, newEventUrl2]);
     } catch (error) {
         console.error('edit_events() error:', error);
     }
@@ -228,10 +230,11 @@ function test_importRoute() {
             visibility: 0,
             name: 'TEST ROUTE - DELETE ME',
             expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-            tags: ['test', 'imported']
+            tags: ['test', 'imported', 'test_import_route']
         };
         importedRouteUrl = rwgps.importRoute(foreignRoute);
         console.log('Imported Route URL:', importedRouteUrl);
+        rwgps.batch_delete_routes([importedRouteUrl]);
     } catch (error) {
         console.error('importRoute() error:', error);
         console.log('Skipping deleteRoute() test due to importRoute() failure.');
