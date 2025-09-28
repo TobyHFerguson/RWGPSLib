@@ -17,6 +17,7 @@ function RWGPSServiceSmokeTest() {
     testGetAll();
     testGet();
     testGetEvent();
+    testTagEvents();
     console.log('---- RWGPSService smoke tests completed ----');
 }
 function testDeleteRoute(id) {
@@ -220,6 +221,23 @@ function testGetEvent() {
     }  
 }
 
+function testTagEvents() {
+    const rwgpsService = getRWGPSService_();
+    console.log('\n--- Test: tagEvents() ---');
+    try {
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
+        const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
+        console.log('Event IDs to tag:', eventIds);
+        const tagResp = rwgpsService.tagEvents(eventIds, ['test', 'template']);
+        console.log('tagEvents called with this.apiService.fetchUserData()');
+        console.log(`tagEvents code: ` + tagResp.getResponseCode());
+        console.log('tagEvents() response:', tagResp.getContentText());
+        rwgpsService.batch_delete_events(eventIds);
+    } catch (error) {
+        console.error('tagEvents() error:', error);
+    }
+}
 function getRWGPSService_() {
     const globals = { CANONICAL_EVENT: '' };
     const credentialManager = new CredentialManager(PropertiesService.getScriptProperties());

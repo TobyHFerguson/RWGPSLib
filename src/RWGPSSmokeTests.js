@@ -10,8 +10,8 @@ function main() {
     test_edit_events()
     test_importRoute()
     test_batch_delete_routes()
-    testTagEvents()
-    testUntagEvents()
+    test_tag_events()
+    test_untag_events()
 }
 
 function test_get_event() {
@@ -202,7 +202,7 @@ function test_batch_delete_routes() {
     }
 }
 
-function testTagEvents() {
+function test_tag_events() {
     console.log('\n--- Test: tag_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
@@ -222,7 +222,7 @@ function testTagEvents() {
     }
 }
 
-function testUntagEvents() {
+function test_untag_events() {
     console.log('\n--- Test: untag_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
