@@ -114,6 +114,38 @@ function testGetRSVPCounts() {
     }
 }
 
+function test_edit_events() {
+    console.log('\n--- Test: edit_events() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const response1 = rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template');
+        const newEventUrl1 = response1;
+        const newEvent1 = rwgps.get_event(newEventUrl1);
+        newEvent1.name = "Updated Event Name 1";
+        newEvent1.desc = "Updated description 1";
+
+        const response2 = rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template');
+        const newEventUrl2 = response2;
+        const newEvent2 = rwgps.get_event(newEventUrl2);
+        newEvent2.name = "Updated Event Name 2";
+        newEvent2.desc = "Updated description 2";
+
+        const eventEditObjects = [
+            { url: newEventUrl1, event: newEvent1 },
+            { url: newEventUrl2, event: newEvent2 }
+        ];
+
+        const events = rwgps.edit_events(eventEditObjects);
+        events.forEach((event, i) => {
+            console.log(`Edited Event[${i}] name:`, event.name);
+            console.log(`Edited Event[${i}] description:`, event.desc);
+            console.log(`Edited Event[${i}] slug:`, event.slug);
+        });
+    } catch (error) {
+        console.error('edit_events() error:', error);
+    }
+}
+
 function getRWGPSObjects_() {
     const Globals = {
 

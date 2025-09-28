@@ -29,8 +29,15 @@
    * @param {String} last_name
    * @param {boolean} [leader] true iff this participant is a leader for the containing event
    */
+
   /**
    * @typedef {Object} RSVPObject
    * @property {String} name name of the event
    * @property {Participant[]} participants
+   */
+
+  /**
+   * @typedef EventEditObject
+   * @property {PublicEventUrl} url - an event url
+   * @property {Event} event - an Event
    */

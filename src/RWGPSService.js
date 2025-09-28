@@ -361,7 +361,7 @@ class RWGPSService {
 
     /**
      * Edit multiple events
-     * @param {Event[]} eventEditObjects - an array of event edit objects
+     * @param {EventEditObject[]} eventEditObjects - an array of event edit objects
      * @returns {HttpResponse} - a promise that resolves when all events have been edited
      */
     edit_events(eventEditObjects) {
@@ -377,7 +377,6 @@ class RWGPSService {
                 contentType: 'application/json',
                 payload: JSON.stringify(new_event),
                 headers: {
-                    cookie: self.cookie,
                     Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
                 },
                 followRedirects: false,

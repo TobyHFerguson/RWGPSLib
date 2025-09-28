@@ -208,11 +208,7 @@ class RWGPS {
     return response;
   }
 
-  /**
-   * @typedef EventEditObject
-   * @prop{string} url - an event url
-   * @prop{Event} event - an Event
-   */
+  
 
   /**
    * Edit the events as defined by the list of eventEditObjects
@@ -229,7 +225,8 @@ class RWGPS {
   }
   edit_events_(eventEditObjects) {
     const responses = this.rwgpsService.edit_events(eventEditObjects);
-    const events = responses.map(response => response["event"]);
+    const contents = responses.map(r => r.getContentText())
+    const events = contents.map(c => JSON.parse(c))
     return events;
   }
   /**
