@@ -1,4 +1,5 @@
-const A_TEMPLATE_URL = 'https://ridewithgps.com/events/404021-a-template'
+// ts-check
+// const A_TEMPLATE_URL = 'https://ridewithgps.com/events/404021-a-template'
 
 function getRWGPSService_() {
     const globals = { CANONICAL_EVENT: '' };
