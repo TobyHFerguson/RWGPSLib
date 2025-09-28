@@ -42,6 +42,7 @@ function main() {
     test_get_event()
     test_get_events()
     test_get_organizers()
+    test_getRouteObject()
     test_importRoute()
     test_lookupOrganizer()
     test_tag_events()
@@ -189,6 +190,19 @@ function test_get_organizers() {
     }
 }
 
+function test_getRouteObject() {
+    console.log('\n--- Test: getRouteObject() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const routeUrl = 'https://ridewithgps.com/routes/19551869'; // Dummy route ID
+        const route = rwgps.getRouteObject(routeUrl);
+        console.log('Route name:', route.name);
+        console.log('Route distance:', route.distance);
+        console.log('Route elevation gain:', route.elevation_gain);
+    } catch (error) {
+        console.error('getRouteObject() error:', error);
+    }
+}   
 function test_lookupOrganizer() {
     console.log('\n--- Test: lookupOrganizer() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();

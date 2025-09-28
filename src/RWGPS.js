@@ -146,7 +146,7 @@ class RWGPS {
 
   /**
    * Return the object at the given route url
-   * @param {string} route_url - url of route to be fetched
+   * @param {PublicRouteUrl} route_url - url of route to be fetched
    */
   getRouteObject(route_url) {
     const response = this.rwgpsService.getRoute(route_url);
