@@ -173,16 +173,16 @@ function RWGPSServiceSmokeTest() {
         }
     }
     // Run tests
-    // testGetRoute();
-    // // testDeleteRoute() - this gets executed in testImportRoute()
-    // testImportRoute();
-    // testCopyTemplate();
-    // // testDeleteEvent() - this gets executed in testCopyTemplate()
-    // testEditEvent();
-    // testBatchDeleteEvents();
-    // testBatchDeleteRoutes();
-    // testUntagEvents()
-    // testGetOrganizers();
+    testGetRoute();
+    // testDeleteRoute() - this gets executed in testImportRoute()
+    testImportRoute();
+    testCopyTemplate();
+    // testDeleteEvent() - this gets executed in testCopyTemplate()
+    testEditEvent();
+    testBatchDeleteEvents();
+    testBatchDeleteRoutes();
+    testUntagEvents()
+    testGetOrganizers();
     testGetAll();
     console.log('---- RWGPSService smoke tests completed ----');
     }

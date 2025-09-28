@@ -4,23 +4,45 @@ class RWGPSService {
         this.globals = globals;
         this.apiService.login();
     }
+    /**
+     * 
+     * @param {string} url 
+     * @param {*} options 
+     * @returns {HttpResponse} 
+     */
     _send_request(url, options) {
+        if (!url || url.length === 0) {
+            throw new Error('URL is required');
+        }
         options.headers = { ...options.headers, 'cookie': this.apiService.webSessionCookie };
         console.log('Sending request to URL:', url);
         console.log('With options:', options);
         const response = UrlFetchApp.fetch(url, options);
         return response;
     }
+    /**
+     * Get a single route by ID
+     * @param {Number} id - the ID of the route to retrieve
+     * @returns {object} the response object
+     */
+    //TODO - take a public route URL
     getRoute(id) {
+        if (!id) {
+            throw new Error('Route ID is required');
+        }
         const url = `https://ridewithgps.com/routes/${id}.json`;
         return this.apiService.fetchPublicData(url);
     }
     /**
      * Delete a single route by url
-     * @param {string} id - the id of the route to delete
+     * @param {Number} id - the id of the route to delete
      * @returns {object} the response object
      */
+    //TODO - take a public route URL
     deleteRoute(id) {
+        if (!id) {
+            throw new Error('Route ID is required');
+        }
         const url = `https://ridewithgps.com/api/v1/routes/${id}.json`;
         const options = {
             method: 'delete',
@@ -32,9 +54,13 @@ class RWGPSService {
     /**
      * Import a foreign route
      * @param {ForeignRoute} routeObject - the foreign route object to be imported
-     * @return {string} the url of the imported route
      */
     importRoute(routeObject) {
+        if (!routeObject) {
+            throw new Error('Route object is required');
+        } else if (!routeObject.url || !this.isPublicRouteUrl(routeObject.url)) {
+            throw new Error(`Invalid foreign route URL: ${routeObject.url}`);
+        }
         const url = routeObject.url + "/copy.json";
         const payload = {
             "user_id": 621846, // SCCCC user
@@ -54,8 +80,37 @@ class RWGPSService {
      * @return {string} the ID extracted from the URL (e.g., "403834")
      */
     extractIdFromUrl(url) {
+        if (!url || url.length === 0) {
+            throw new Error('URL is required');
+        }
         const match = url.match(/\/(\d+)(-|$)/);
         return match ? match[1] : null;
+    }
+
+    /**
+     * Check if a URL is a public route URL
+     * @param {string} url - the URL to check
+     * @returns {boolean} true if the URL is a public route URL, false otherwise
+     */
+    isPublicRouteUrl(url) {
+        if (!url || url.length === 0) {
+            throw new Error('URL is required');
+        }
+        const publicRoutePattern = /^https:\/\/ridewithgps\.com\/routes\/\d+$/;
+        return publicRoutePattern.test(url);
+    }
+
+    /**
+     * Check if a URL is a public event URL
+     * @param {string} url - the URL to check
+     * @returns {boolean} true if the URL is a public event URL, false otherwise
+     */
+    isPublicEventUrl(url) {
+        if (!url || url.length === 0) {
+            throw new Error('URL is required');
+        }
+        const publicEventPattern = /^https:\/\/ridewithgps\.com\/events\/\d+[^/]*$/;
+        return publicEventPattern.test(url);
     }
 
     /**
@@ -65,6 +120,12 @@ class RWGPSService {
   * @return object - the new object created
   */
     key_filter(left, right) {
+        if (!left || typeof left !== 'object') {
+            throw new Error('Left object is required');
+        }
+        if (!right || typeof right !== 'object') {
+            throw new Error('Right object is required');
+        }
         let no = { ...left };
         let left_keys = Object.keys(no);
         let right_keys = Object.keys(right);
@@ -74,12 +135,17 @@ class RWGPSService {
 
     /**
      * Copy an event template
-     * @param {string} template_url
-     * @returns {object} the response object
+     * @param {PublicEventUrl} template_url
+     * @returns {HttpResponse} the response object
      * 
      * Note, the Location header of the response contains the URL of the new event
      */
     copy_template_(template_url) {
+        if (!this.isPublicEventUrl(template_url)) {
+            throw new Error(`Invalid public event URL: ${template_url}`);
+        }
+        // POST to https://ridewithgps.com/events/186557-a-template/copy
+        // with form data:
         const url = template_url + "/copy"; // not JSON - need to get the html redirect
         const payload = {
             'event[name]': "COPIED EVENT",
@@ -95,11 +161,18 @@ class RWGPSService {
         return this.apiService.fetchUserData(url, options);
     }
 
+    /**
+     * Delete an event
+     * @param {PublicEventUrl} event_url
+     * @returns {HttpResponse} the response object
+     */
     deleteEvent(event_url) {
-        const id = this.extractIdFromUrl(event_url);
-        if (!id) {
-            throw new Error(`Invalid event URL: ${event_url}`);
+        if (!this.isPublicEventUrl(event_url)) {
+            throw new Error(`Invalid public event URL: ${event_url}`);
         }
+        // DELETE to https://ridewithgps.com/api/v1/events/403834.json
+        // where 403834 is the event ID extracted from the event_url
+        const id = this.extractIdFromUrl(event_url);
         const url = `https://ridewithgps.com/api/v1/events/${id}.json`
         const options = {
             method: 'delete',
@@ -117,24 +190,28 @@ class RWGPSService {
 
     /**
      * 
-     * @param {number} url - public event URL
+     * @param {PublicEventUrl} url - public event URL
      * @returns {Object} event object as per https://github.com/ridewithgps/developers/blob/master/endpoints/events.md#get-apiv1eventsidjson
      */
     getEvent(url) {
-        //TODO - validate url - it must be a public event url
+        if (!this.isPublicEventUrl(url)) {
+            throw new Error(`Invalid public event URL: ${url}`);
+        }
         const id = this.extractIdFromUrl(url);
         const event_url = `https://ridewithgps.com/api/v1/events/${id}.json`;
         return this.apiService.fetchClubData(event_url);
     }
     /**
      * Edit an event
-     * @param {string} event_url - the public URL of the event to be edited
-     * @param {Object} event - the event object containing the updated details
+     * @param {PublicEventUrl} event_url - the public URL of the event to be edited
+     * @param {Event} event - the event object containing the updated details only
      * @returns {object} the response object
      */
     edit_event(event_url, event) {
+        if (!this.isPublicEventUrl(event_url)) {
+            throw new Error(`Invalid public event URL: ${event_url}`);
+        }
         //TODO - validate event object
-        //TODO - validate event_url - it must be a public event url
         let new_event = this.key_filter(event, CANONICAL_EVENT);
         const options = {
             method: 'put',
@@ -154,6 +231,7 @@ class RWGPSService {
      * @param{string[]} event_ids - an array containing the ids of the events to delete
      * @returns {object} the response object which contains an array of the deleted events
      */
+    //TODO - take an array of public event URLs
     batch_delete_events(event_ids) {
         let url = "https://ridewithgps.com/events/batch_destroy.json";
         const payload = { event_ids: event_ids.join() }
@@ -167,11 +245,12 @@ class RWGPSService {
      * Delete multiple routes
      * @param{string[]} route_ids - an array containing the ids of the routes to delete
      */
+    //TODO - take an array of public route URLs
     batch_delete_routes(route_ids) {
         let url = "https://ridewithgps.com/routes/batch_destroy.json";
         const payload = { route_ids: route_ids.join(',') }
         const options = {
-           payload: payload
+            payload: payload
         }
         return this.apiService.fetchUserData(url, options);
     }
@@ -194,10 +273,6 @@ class RWGPSService {
         }
     }
 
-    /**
-   * A number, or a string containing a number.
-   * @typedef {(number|string)} NumberLike
-   */
     /**
      * Add multiple tags to multiple events - idempotent
      * @param{NumberLike[]} ids - an array containing the ids of the events to add the tags to
@@ -236,13 +311,19 @@ class RWGPSService {
 
     /**
      * Get organizer IDs for a specific event
-     * @param {string} url public event URL
+     * @param {PublicEventUrl} url public event URL
      * @param {string} organizer_name 
      * @returns 
      */
     //TODO - use the private table mechanism to get all users in one go.
     //TODO: get rid of organizer_name - not needed.
     getOrganizers(url, organizer_name) {
+        if (!this.isPublicEventUrl(url)) {
+            throw new Error(`Invalid public event URL: ${url}`);
+        }
+        if (!organizer_name || organizer_name.length === 0) {
+            throw new Error('Organizer name is required');
+        }
         url = `${url}/organizer_ids.json`;
         const payload = { term: organizer_name.split(' ')[0], page: 1 }
         const options = {
@@ -251,7 +332,16 @@ class RWGPSService {
         return this.apiService.fetchUserData(url, options);
     }
 
+    /**
+     * Get all events or routes
+     * @param {string[]} urls - an array of public event or route URLs
+     * @param {*} override - optional override parameters
+     * @returns {HttpResponse[]} - an array of response objects
+     */
     getAll(urls, override = {}) {
+        if (!Array.isArray(urls) || urls.length === 0) {
+            throw new Error('urls must be a non-empty array');
+        }
         const requests = urls.map(url => {
             let r = {
                 url,
@@ -262,7 +352,15 @@ class RWGPSService {
         return this.apiService.fetchUserData(requests);
     }
 
+    /**
+     * Edit multiple events
+     * @param {Event[]} eventEditObjects - an array of event edit objects
+     * @returns {HttpResponse} - a promise that resolves when all events have been edited
+     */
     edit_events(eventEditObjects) {
+        if (!Array.isArray(eventEditObjects) || eventEditObjects.length === 0) {
+            throw new Error('eventEditObjects must be a non-empty array');
+        }
         const self = this;
         function createRequest(eventEditObject) {
             let new_event = self.key_filter(eventEditObject.event, CANONICAL_EVENT);
