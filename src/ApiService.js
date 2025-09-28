@@ -57,27 +57,55 @@ class ApiService {
         };
 
         try {
-            const response = UrlFetchApp.fetch(loginUrl, options);
-            const headers = response.getAllHeaders();
-            const setCookieHeader = Array.isArray(headers['Set-Cookie']) ? headers['Set-Cookie'][0] : headers['Set-Cookie'];
-            this.webSessionCookie = setCookieHeader.split(';')[0];
-            return true;
+            const resp = UrlFetchApp.fetch(loginUrl, options);
+            this._updateCookieFromResponse(resp);  // new
+            return !!this.webSessionCookie;        // success if we got a cookie
         } catch (e) {
             console.log(`Login request failed: ${e.message}`);
             return false;
         }
     }
 
+
     // Internal fetch — always resolves to UrlFetchApp calls for Step 1
     _doFetch(requests) {
         if (Array.isArray(requests)) {
-            return UrlFetchApp.fetchAll(requests);
+            const responses = UrlFetchApp.fetchAll(requests);
+            responses.forEach(resp => this._updateCookieFromResponse(resp));
+            return responses;
+        } else {
+            const { url, ...opts } = requests;
+            const resp = UrlFetchApp.fetch(url, opts);
+            this._updateCookieFromResponse(resp);
+            return resp;
         }
-        const { url, ...opts } = requests;
-        console.log('Fetching URL:', url);
-        console.log('With options:', opts);
-        return UrlFetchApp.fetch(url, opts);
     }
+
+    /**
+     * Look for a Set-Cookie header and update the stored session cookie if present.
+     */
+    _updateCookieFromResponse(response) {
+        const headers = response.getAllHeaders();
+        let setCookieHeader = headers['Set-Cookie'];
+        if (!setCookieHeader) return;
+
+        // normalize to array
+        if (!Array.isArray(setCookieHeader)) {
+            setCookieHeader = [setCookieHeader];
+        }
+
+        for (const cookie of setCookieHeader) {
+            if (cookie.startsWith('_rwgps_3_session=')) {
+                const newCookie = cookie.split(';')[0];
+                if (this.webSessionCookie !== newCookie) {
+                    console.log(`Cookie updated: ${this.webSessionCookie || '(none)'} → ${newCookie}`);
+                    this.webSessionCookie = newCookie;
+                }
+                break;
+            }
+        }
+    }
+
     /**
      * A single, powerful fetch method that handles both individual and batch requests.
      *
@@ -181,8 +209,8 @@ function smokeTest_ApiService() {
     try {
         Logger.log('--- Test: BATCH ---');
         const requests = [
-            { url: 'https://ridewithgps.com/api/v1/events/186557.json' },
-            { url: 'https://ridewithgps.com/api/v1/events/186234.json' }
+            { url: 'https://ridewithgps.com/events/404021.json' },
+            { url: 'https://ridewithgps.com/events/404019.json' }
         ];
         const resps = api.fetchClubData(requests);
         resps.forEach((resp, i) => {
