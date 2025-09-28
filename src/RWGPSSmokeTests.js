@@ -45,6 +45,7 @@ function main() {
     test_getRouteObject()
     test_importRoute()
     test_lookupOrganizer()
+    test_setRouteExpiration()
     test_tag_events()
     test_untag_events()
     testGetRSVPCounts()
@@ -238,6 +239,39 @@ function test_importRoute() {
     }
 }
 
+function test_setRouteExpiration() {
+    console.log('\n--- Test: setRouteExpiration() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    let importedRouteUrl;
+    try {
+        const foreignRoute = {
+            url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
+            visibility: 0,
+            name: 'TEST ROUTE - SET EXPIRY',
+            expiry: new Date(), // 1 week from now
+            tags: ['test', 'imported']
+        };
+        importedRouteUrl = rwgps.importRoute(foreignRoute);
+        console.log('Imported Route URL:', importedRouteUrl);
+
+        const newExpiry = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 2 weeks from now
+        const updatedRoute = rwgps.setRouteExpiration(importedRouteUrl, newExpiry);
+        console.log('Updated Route Expiry:', updatedRoute.expiry);
+
+        // Clean up by deleting the route
+        rwgps.batch_delete_routes([importedRouteUrl]);
+    } catch (error) {
+        console.error('setRouteExpiration() error:', error);
+        if (importedRouteUrl) {
+            console.log('Attempting to delete imported route due to error.');
+            try {
+                rwgps.batch_delete_routes([importedRouteUrl]);
+            } catch (deleteError) {
+                console.error('Failed to delete imported route:', deleteError);
+            }
+        }
+    }
+}
 function test_tag_events() {
     console.log('\n--- Test: tag_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
