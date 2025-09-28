@@ -338,6 +338,7 @@ class RWGPS {
         }
         return found;
       } catch (e) {
+        //TODO this logging is just incorrect. Need to fix!
         Logger.log(`RWGPS.lookupOrganizer(${url}, ${organizer_name}) threw ${e}`);
         Logger.log(`RWGPS.lookupOrganizer(${url}, ${organizer_name}) content text: ${response.getContentText()}`);
         throw (e);

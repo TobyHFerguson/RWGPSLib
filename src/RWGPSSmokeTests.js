@@ -43,6 +43,7 @@ function main() {
     test_get_events()
     test_get_organizers()
     test_importRoute()
+    test_lookupOrganizer()
     test_tag_events()
     test_untag_events()
     testGetRSVPCounts()
@@ -185,6 +186,20 @@ function test_get_organizers() {
         console.log('Organizers:', organizers);
     } catch (error) {
         console.error('getOrganizers() error:', error);
+    }
+}
+
+function test_lookupOrganizer() {
+    console.log('\n--- Test: lookupOrganizer() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {   
+        const url = globals.A_TEMPLATE;
+        const name = 'Toby Ferguson';
+
+        const organizer = rwgps.lookupOrganizer(url, name);
+        console.log('Organizer:', organizer);
+    } catch (error) {
+        console.error('lookupOrganizer() error:', error);
     }
 }
 
