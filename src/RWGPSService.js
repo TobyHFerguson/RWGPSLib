@@ -22,34 +22,37 @@ class RWGPSService {
     }
     /**
      * Get a single route by ID
-     * @param {Number} id - the ID of the route to retrieve
+     * @param {PublicRouteUrl} url - the ID of the route to retrieve
      * @returns {object} the response object
      */
-    //TODO - take a public route URL
-    getRoute(id) {
-        if (!id) {
-            throw new Error('Route ID is required');
+    getRoute(url) {
+        if (!this.isPublicRouteUrl(url)) {
+            throw new Error(`Invalid public route URL: ${url}`);
         }
-        const url = `https://ridewithgps.com/routes/${id}.json`;
-        return this.apiService.fetchPublicData(url);
+        const options = {
+            headers: {
+                Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
+            }
+        }
+        return this.apiService.fetchPublicData(url, options);
     }
     /**
      * Delete a single route by url
-     * @param {Number} id - the id of the route to delete
+     * @param {PublicRouteUrl} url - the public route URL to delete
      * @returns {object} the response object
      */
-    //TODO - take a public route URL
-    deleteRoute(id) {
-        if (!id) {
-            throw new Error('Route ID is required');
+    deleteRoute(url) {
+        if (!this.isPublicRouteUrl(url)) {
+            throw new Error('Route URL is required');
         }
-        const url = `https://ridewithgps.com/api/v1/routes/${id}.json`;
+        const id = this.extractIdFromUrl(url);
+        const routeUrl = `https://ridewithgps.com/api/v1/routes/${id}.json`;
         const options = {
             method: 'delete',
             followRedirects: false,
             muteHttpExceptions: false
         }
-        return this.apiService.fetchClubData(url, options);
+        return this.apiService.fetchClubData(routeUrl, options);
     }
     /**
      * Import a foreign route

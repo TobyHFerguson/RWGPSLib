@@ -26,7 +26,7 @@ function RWGPSServiceSmokeTest() {
             console.log('importRoute called with this.apiService.fetchUserData()');
             console.log('importRoute response code:', importResp.getResponseCode());
             console.log('importRoute() response id:', JSON.parse(importResp.getContentText()).id);
-            testDeleteRoute(JSON.parse(importResp.getContentText()).id);
+            testDeleteRoute(JSON.parse(importResp.getContentText()).url);
         } catch (error) {
             console.error('importRoute() error:', error);
             console.log('Skipping deleteRoute() test due to importRoute() failure.');
@@ -37,9 +37,9 @@ function RWGPSServiceSmokeTest() {
 
     function testGetRoute() {
         console.log('\n--- Test: getRoute() ---');
-        const id = 49027962; // Dummy route ID
+        const url = 'https://ridewithgps.com/routes/49027962'; // Dummy route ID
         try {
-            const getResp = rwgpsService.getRoute(id);
+            const getResp = rwgpsService.getRoute(url);
             console.log('getRoute called with apiService.getPublicData()');
             console.log('getRoute response code:', getResp.getResponseCode());
             console.log('getRoute() response:', JSON.parse(getResp.getContentText()).name);

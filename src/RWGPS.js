@@ -382,7 +382,7 @@ class RWGPS {
    * @param {string} route_url - url of route to be fetched
    */
   getRouteObject(route_url) {
-    const response = this.rwgpsService.get(route_url);
+    const response = this.rwgpsService.getRoute(route_url);
     const o = JSON.parse(response.getContentText());
     return o;
   }
