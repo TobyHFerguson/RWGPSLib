@@ -17,7 +17,7 @@ function test_get_event() {
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     console.log('\n--- Test: get_event() ---');
     try {
-        const eventUrl = 'https://ridewithgps.com/events/186557-a-template';
+        const eventUrl = globals.A_TEMPLATE;
         const event = rwgps.get_event(eventUrl);
         console.log('Event name:', event.name);
         console.log('Event description:', event.desc);
@@ -31,7 +31,7 @@ function test_get_events() {
     console.log('\n--- Test: get_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
-        const events = rwgps.get_events(['https://ridewithgps.com/events/186557-a-template', 'https://ridewithgps.com/events/186557-a-template']);
+        const events = rwgps.get_events([globals.A_TEMPLATE, globals.A_TEMPLATE]);
         events.forEach((event, i) => {
             console.log(`Event[${i}] name:`, event.name);
             console.log(`Event[${i}] description:`, event.desc);
@@ -45,7 +45,7 @@ function test_get_events() {
 function test_copy_template() {
     console.log('\n--- Test: copy_template() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
-    const ATemplate = 'https://ridewithgps.com/events/186557-a-template'
+    const ATemplate = globals.A_TEMPLATE
     try {
         const copyResp = rwgps.copy_template_(ATemplate);
         console.log('copy_template_ result is a Public Event URL:', copyResp);
@@ -58,8 +58,8 @@ function test_batch_delete_events() {
     console.log('\n--- Test: batch_delete_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
-        const eventUrls = [rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template'),
-        rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template')];
+        const eventUrls = [rwgps.copy_template_(globals.A_TEMPLATE),
+        rwgps.copy_template_(globals.A_TEMPLATE)];
         const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
         console.log('Event IDs to delete:', eventIds);
         const deleteResps = rwgps.batch_delete_events(eventUrls);
@@ -122,13 +122,13 @@ function test_edit_events() {
     console.log('\n--- Test: edit_events() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
-        const response1 = rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template');
+        const response1 = rwgps.copy_template_(globals.A_TEMPLATE);
         const newEventUrl1 = response1;
         const newEvent1 = rwgps.get_event(newEventUrl1);
         newEvent1.name = "Updated Event Name 1";
         newEvent1.desc = "Updated description 1";
 
-        const response2 = rwgps.copy_template_('https://ridewithgps.com/events/186557-a-template');
+        const response2 = rwgps.copy_template_(globals.A_TEMPLATE);
         const newEventUrl2 = response2;
         const newEvent2 = rwgps.get_event(newEventUrl2);
         newEvent2.name = "Updated Event Name 2";
@@ -207,9 +207,9 @@ function getRWGPSObjects_() {
 
         RIDE_LEADER_TBD_NAME: 'To Be Determined',
 
-        A_TEMPLATE: `https://ridewithgps.com/events/186557-a-template`,
-        B_TEMPLATE: `https://ridewithgps.com/events/186234-b-template`,
-        C_TEMPLATE: `https://ridewithgps.com/events/186235-c-template`,
+        A_TEMPLATE: `https://ridewithgps.com/events/404021-a-template`,
+        B_TEMPLATE: `https://ridewithgps.com/events/404019-b-template`,
+        C_TEMPLATE: `https://ridewithgps.com/events/404022-c-template`,
         SIGN_IN_URI: `https://ridewithgps.com/organizations/47/sign_in`,
         EVENTS_URI: 'https://ridewithgps.com/events/',
 

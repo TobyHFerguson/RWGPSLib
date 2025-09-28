@@ -1,3 +1,5 @@
+const A_TEMPLATE_URL='https://ridewithgps.com/events/404021-a-template'
+
 function RWGPSServiceSmokeTest() {
     console.log('RWGPSServiceSmokeTest: RWGPSService instantiated successfully.');
     console.log('---- Starting RWGPSService smoke tests ----');
@@ -64,9 +66,8 @@ function testGetRoute() {
 function testCopyTemplate() {
     console.log('\n--- Test: copyTemplate() ---');
     const rwgpsService = getRWGPSService_();
-    const ATemplate = 'https://ridewithgps.com/events/186557-a-template'
     try {
-        const copyResp = rwgpsService.copy_template_(ATemplate);
+        const copyResp = rwgpsService.copy_template_(A_TEMPLATE_URL);
         console.log('copy_template_ called with this.apiService.fetchUserData()');
         console.log('copy_template_ response code:', copyResp.getResponseCode());
         console.log('copy_template_() response:', copyResp.getContentText());
@@ -93,7 +94,7 @@ function testDeleteEvent(eventUrl) {
 function testEditEvent() {
     console.log('\n--- Test: edit_event() ---');
     const rwgpsService = getRWGPSService_();
-    const response = rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template');
+    const response = rwgpsService.copy_template_(A_TEMPLATE_URL);
     const newEventUrl = response.getAllHeaders().Location;
     const newEvent = rwgpsService.getEvent(newEventUrl);
     newEvent.name = "Updated Event Name";
@@ -110,8 +111,8 @@ function testBatchDeleteEvents() {
     console.log('\n--- Test: batchDeleteEvents() ---');
     const rwgpsService = getRWGPSService_();
     try {
-        const eventUrls = [rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location,
-        rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location];
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
         const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
         console.log('Event IDs to delete:', eventIds);
         const deleteResps = rwgpsService.batch_delete_events(eventIds);
@@ -147,8 +148,8 @@ function testUntagEvents() {
     const rwgpsService = getRWGPSService_();
     console.log('\n--- Test: untagEvents() ---');
     try {
-        const eventUrls = [rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location,
-        rwgpsService.copy_template_('https://ridewithgps.com/events/186557-a-template').getAllHeaders().Location];
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
         const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
         console.log('Event IDs to untag:', eventIds);
         const untagResp = rwgpsService.unTagEvents(eventIds, ['template']);

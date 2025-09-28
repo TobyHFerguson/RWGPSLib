@@ -18,9 +18,9 @@ const Globals = {
 
     RIDE_LEADER_TBD_NAME: 'To Be Determined',
 
-    A_TEMPLATE: `https://ridewithgps.com/events/186557-a-template`,
-    B_TEMPLATE: `https://ridewithgps.com/events/186234-b-template`,
-    C_TEMPLATE: `https://ridewithgps.com/events/186235-c-template`,
+     A_TEMPLATE: `https://ridewithgps.com/events/404021-a-template`,
+        B_TEMPLATE: `https://ridewithgps.com/events/404019-b-template`,
+        C_TEMPLATE: `https://ridewithgps.com/events/404022-c-template`,
     SIGN_IN_URI: `https://ridewithgps.com/organizations/47/sign_in`,
     RSVP_BASE_URL: 'https://tinyurl.com/3b8njz7y',
 
