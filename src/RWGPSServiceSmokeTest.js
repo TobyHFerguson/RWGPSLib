@@ -1,4 +1,4 @@
-const A_TEMPLATE_URL='https://ridewithgps.com/events/404021-a-template'
+const A_TEMPLATE_URL = 'https://ridewithgps.com/events/404021-a-template'
 
 function RWGPSServiceSmokeTest() {
     console.log('RWGPSServiceSmokeTest: RWGPSService instantiated successfully.');
@@ -15,6 +15,7 @@ function RWGPSServiceSmokeTest() {
     testUntagEvents()
     testGetOrganizers();
     testGetAll();
+    testGet();
     console.log('---- RWGPSService smoke tests completed ----');
 }
 function testDeleteRoute(id) {
@@ -195,7 +196,14 @@ function testGetAll() {
     }
 }
 
-
+function testGet() {
+    console.log('\n--- Test: get() ---');
+    const rwgpsService = getRWGPSService_();
+    console.log('get call with this.apiService.fetchPublicData')
+    const response = rwgpsService.get('https://ridewithgps.com/')
+    console.log('rwgpsService.get() response code:', response.getResponseCode());
+    console.log('rwgpsService.get() response text:', response.getContentText().substring(0, 200)); // Log first 200 chars       
+}
 function getRWGPSService_() {
     const globals = { CANONICAL_EVENT: '' };
     const credentialManager = new CredentialManager(PropertiesService.getScriptProperties());
