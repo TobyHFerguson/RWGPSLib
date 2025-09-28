@@ -348,6 +348,10 @@ class RWGPSService {
         const requests = urls.map(url => {
             let r = {
                 url,
+                headers: {
+                    Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
+                },
+                ...override
             };
             return r;
         })
