@@ -18,6 +18,7 @@ function RWGPSServiceSmokeTest() {
     testGet();
     testGetEvent();
     testTagEvents();
+    testTagRoutes();
     console.log('---- RWGPSService smoke tests completed ----');
 }
 function testDeleteRoute(id) {
@@ -218,7 +219,7 @@ function testGetEvent() {
         console.log('getEvent() response:', JSON.parse(getResp.getContentText()));
     } catch (error) {
         console.error('getEvent() error:', error);
-    }  
+    }
 }
 
 function testTagEvents() {
@@ -238,6 +239,30 @@ function testTagEvents() {
         console.error('tagEvents() error:', error);
     }
 }
+
+function testTagRoutes() {
+    const rwgpsService = getRWGPSService_();
+    console.log('\n--- Test: tagRoutes() ---');
+    try {
+        const routeUrls = [rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        }), rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        })].map(resp => JSON.parse(resp.getContentText()).url);
+        const routeIds = routeUrls.map(url => rwgpsService.extractIdFromUrl(url));
+        console.log('Route IDs to tag:', routeIds);
+        const tagResp = rwgpsService.tagRoutes(routeIds, ['test', 'template']);
+        console.log('tagRoutes called with this.apiService.fetchUserData()');
+        console.log(`tagRoutes code: ` + tagResp.getResponseCode());
+        console.log('tagRoutes() response:', tagResp.getContentText());
+        rwgpsService.batch_delete_routes(routeUrls);
+    } catch (error) {
+        console.error('tagRoutes() error:', error);
+    }
+}
+
 function getRWGPSService_() {
     const globals = { CANONICAL_EVENT: '' };
     const credentialManager = new CredentialManager(PropertiesService.getScriptProperties());
