@@ -126,12 +126,7 @@ class RWGPS {
     return events;
   }
 
-  /**
-   * The Organizer (i.e. ride leader) of an event
-   * @typedef Organizer 
-   * @property {string} id the organizer id
-   * @property {string} text the organizer's name
-   */
+ 
   /**
      * 
      * @param {string[]} names - list of ride leader names

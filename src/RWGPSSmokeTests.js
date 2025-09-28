@@ -41,6 +41,7 @@ function main() {
     test_edit_events()
     test_get_event()
     test_get_events()
+    test_get_organizers()
     test_importRoute()
     test_tag_events()
     test_untag_events()
@@ -51,7 +52,7 @@ function main() {
 
 function test_batch_delete_events() {
     console.log('\n--- Test: batch_delete_events() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventUrls = [rwgps.copy_template_(globals.A_TEMPLATE),
         rwgps.copy_template_(globals.A_TEMPLATE)];
@@ -68,7 +69,7 @@ function test_batch_delete_events() {
 
 function test_batch_delete_routes() {
     console.log('\n--- Test: batch_delete_routes() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const routeUrls = [rwgps.importRoute({
             url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
@@ -98,7 +99,7 @@ function test_batch_delete_routes() {
 
 function test_copy_template() {
     console.log('\n--- Test: copy_template() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     const ATemplate = globals.A_TEMPLATE
     try {
         const copyResp = rwgps.copy_template_(ATemplate);
@@ -115,7 +116,7 @@ function test_edit_event() {
 }
 function test_edit_events() {
     console.log('\n--- Test: edit_events() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const response1 = rwgps.copy_template_(globals.A_TEMPLATE);
         const newEventUrl1 = response1;
@@ -146,7 +147,7 @@ function test_edit_events() {
 }
 
 function test_get_event() {
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     console.log('\n--- Test: get_event() ---');
     try {
         const eventUrl = globals.A_TEMPLATE;
@@ -161,7 +162,7 @@ function test_get_event() {
 
 function test_get_events() {
     console.log('\n--- Test: get_events() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const events = rwgps.get_events([globals.A_TEMPLATE, globals.A_TEMPLATE]);
         events.forEach((event, i) => {
@@ -174,9 +175,22 @@ function test_get_events() {
     }
 }
 
+function test_get_organizers() {
+    console.log('\n--- Test: getOrganizers() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {   
+        const names = ['Toby Ferguson', 'John Doe']
+
+        const organizers = rwgps.getOrganizers(names);
+        console.log('Organizers:', organizers);
+    } catch (error) {
+        console.error('getOrganizers() error:', error);
+    }
+}
+
 function test_importRoute() {
     console.log('\n--- Test: import_route() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     let importedRouteUrl;
     try {
         const foreignRoute = {
@@ -197,7 +211,7 @@ function test_importRoute() {
 
 function test_tag_events() {
     console.log('\n--- Test: tag_events() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventUrls = [globals.A_TEMPLATE, globals.B_TEMPLATE, globals.C_TEMPLATE
         ].map(url => rwgps.copy_template_(url));
@@ -217,7 +231,7 @@ function test_tag_events() {
 
 function test_untag_events() {
     console.log('\n--- Test: untag_events() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventUrls = [globals.A_TEMPLATE, globals.B_TEMPLATE, globals.C_TEMPLATE
         ].map(url => rwgps.copy_template_(url));
@@ -240,7 +254,7 @@ function test_untag_events() {
 
 function testGetRSVPCounts() {
     console.log('\n--- Test: getRSVPCounts() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventUrls = [
             'https://ridewithgps.com/events/341643',
@@ -255,7 +269,7 @@ function testGetRSVPCounts() {
 
 function testGetRSVPObject() {
     console.log('\n--- Test: getRSVPObject() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventId = 341643; // Example event ID
         const rsvpObject = rwgps.getRSVPObject(eventId);
@@ -271,7 +285,7 @@ function testGetRSVPObject() {
 
 function testGetRSVPObjectByUrl() {
     console.log('\n--- Test: getRSVPObjectByURL() ---');
-    const { rwgpsService, rwgps, globals } = _getRWGPSObjects_();
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
         const eventUrl = 'https://ridewithgps.com/events/341643';
         const rsvpObject = rwgps.getRSVPObjectByURL(eventUrl);
