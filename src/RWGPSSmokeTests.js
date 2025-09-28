@@ -1,13 +1,13 @@
 function main() {
     console.log('RWGPS Smoke Tests');
-    testGetEvent()
+    test_get_event()
     test_get_events()
     test_copy_template()
     test_batch_delete_events()
 
 }
 
-function testGetEvent() {
+function test_get_event() {
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     console.log('\n--- Test: get_event() ---');
     try {
@@ -63,6 +63,22 @@ function test_batch_delete_events() {
     } catch (error) {
         console.error('batch_delete_events() error:', error);
     }   
+}
+
+function testGetRSVPObjectsByUrl() {
+    console.log('\n--- Test: getRSVPObjectByURL() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const eventUrl = 'https://ridewithgps.com/events/341643';
+        const rsvpObject = rwgps.getRSVPObjectByURL(eventUrl);
+        console.log('RSVP Object name:', rsvpObject.name);
+        console.log('RSVP Object participants:', rsvpObject.participants.length);
+        rsvpObject.participants.forEach((p, i) => {
+            console.log(`Participant[${i}]: ${p.first_name} ${p.last_name} ${p.leader ? '(Leader)' : ''}`);
+        });
+    } catch (error) {
+        console.error('getRSVPObjectByURL() error:', error);
+    }
 }
 
 function getRWGPSObjects_() {
