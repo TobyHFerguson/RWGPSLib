@@ -75,6 +75,8 @@ class ApiService {
             return responses;
         } else {
             const { url, ...opts } = requests;
+            console.log('ApiService._doFetch() - Fetching URL:', url);
+            console.log('ApiService._doFetch() - With options:', opts);
             const resp = UrlFetchApp.fetch(url, opts);
             this._updateCookieFromResponse(resp);
             return resp;
