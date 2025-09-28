@@ -22,3 +22,15 @@
 * A number, or a string containing a number.
 * @typedef {(number|string)} NumberLike
 */
+
+/**
+   * @typedef {Object} Participant
+   * @param {String} first_name
+   * @param {String} last_name
+   * @param {boolean} [leader] true iff this participant is a leader for the containing event
+   */
+  /**
+   * @typedef {Object} RSVPObject
+   * @property {String} name name of the event
+   * @property {Participant[]} participants
+   */

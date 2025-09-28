@@ -29,6 +29,7 @@ class RWGPS {
    * @param {number} event_id the id of the event
    * @returns {RSVPObject} the rsvp object that represents this event's participants
    */
+  //TODO - deprecate this in favor of getRSVPObjectByURL
   getRSVPObject(event_id) {
     if (!event_id) {
       console.log(`RWGPS.getRSVPObject(${event_id}) with no event_id`)
@@ -45,20 +46,10 @@ class RWGPS {
       return { name: `No such event: ${event_id}`, participants: [] }
     }
   }
-  /**
-   * @typedef {Object} Participant
-   * @param {String} first_name
-   * @param {String} last_name
-   * @param {boolean} [leader] true iff this participant is a leader for the containing event
-   */
-  /**
-   * @typedef {Object} RSVPObject
-   * @property {String} name name of the event
-   * @property {Participant[]} participants
-   */
+  
   /**
    * Get the RSVP Object that corresponds to the event at the given url
-   * @param {URL} e_url Url of an event
+   * @param {PublicEventUrl} e_url Url of an event
    * @returns {RSVPObject} the rsvp object that represents the given event
    */
   getRSVPObjectByURL(e_url) {
@@ -243,7 +234,7 @@ class RWGPS {
   }
   /**
    * 
-   * @param {URL[]} event_urls event urls to be deleted
+   * @param {PublicEventUrl[]} event_urls event urls to be deleted
    * @returns response from rwgps
    * @throws Exception if there's an error
    */
@@ -253,7 +244,7 @@ class RWGPS {
   }
   /**
      * 
-     * @param {URL[]} route_urls route urls to be deleted
+     * @param {PublicRouteUrl[]} route_urls route urls to be deleted
      * @returns response from rwgps
      * @throws Exception if there's an error
      */
