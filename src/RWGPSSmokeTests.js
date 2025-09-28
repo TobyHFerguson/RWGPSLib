@@ -4,7 +4,9 @@ function main() {
     test_get_events()
     test_copy_template()
     test_batch_delete_events()
-
+    testGetRSVPObjectByUrl()
+    testGetRSVPObject()
+    testGetRSVPCounts()
 }
 
 function test_get_event() {
@@ -65,7 +67,7 @@ function test_batch_delete_events() {
     }   
 }
 
-function testGetRSVPObjectsByUrl() {
+function testGetRSVPObjectByUrl() {
     console.log('\n--- Test: getRSVPObjectByURL() ---');
     const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
     try {
@@ -78,6 +80,37 @@ function testGetRSVPObjectsByUrl() {
         });
     } catch (error) {
         console.error('getRSVPObjectByURL() error:', error);
+    }
+}
+
+function testGetRSVPObject() {
+    console.log('\n--- Test: getRSVPObject() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const eventId = 341643; // Example event ID
+        const rsvpObject = rwgps.getRSVPObject(eventId);
+        console.log('RSVP Object name:', rsvpObject.name);
+        console.log('RSVP Object participants:', rsvpObject.participants.length);
+        rsvpObject.participants.forEach((p, i) => {
+            console.log(`Participant[${i}]: ${p.first_name} ${p.last_name} ${p.leader ? '(Leader)' : ''}`);
+        });
+    } catch (error) {
+        console.error('getRSVPObject() error:', error);
+    }       
+}
+
+function testGetRSVPCounts() {
+    console.log('\n--- Test: getRSVPCounts() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const eventUrls = [
+            'https://ridewithgps.com/events/341643',
+            'https://ridewithgps.com/events/341643',
+        ];
+        const rsvpCounts = rwgps.getRSVPCounts(eventUrls);
+        console.log('RSVP Counts:', rsvpCounts);
+    } catch (error) {
+        console.error('getRSVPCounts() error:', error);
     }
 }
 

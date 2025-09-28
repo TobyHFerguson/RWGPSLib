@@ -141,7 +141,7 @@ class RWGPS {
   /**
    * Return the counts for each of the given event urls.
    * A count of 0 is given for any url that throws an error, and a log message is recorded.
-   * @param {string[]} event_urls 
+   * @param {PublicEventUrl[]} event_urls
    * @param{string[]} rideLeaders - array of array of ride leader names, corresponding to the event_urls
    * @returns{Number[]} the counts, in the same order as the corresponding event url.
    */
