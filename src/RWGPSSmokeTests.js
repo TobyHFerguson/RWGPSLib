@@ -10,7 +10,7 @@ function main() {
     test_edit_events()
     test_importRoute()
     test_batch_delete_routes()
-
+    testTagEvents()
 }
 
 function test_get_event() {
@@ -198,6 +198,26 @@ function test_batch_delete_routes() {
         console.log('Deleted route IDs:', deletedRouteIds);
     } catch (error) {
         console.error('batch_delete_routes() error:', error);
+    }
+}
+
+function testTagEvents() {
+    console.log('\n--- Test: tag_events() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const eventUrls = [globals.A_TEMPLATE, globals.B_TEMPLATE, globals.C_TEMPLATE
+        ].map(url => rwgps.copy_template_(url));
+        const tags = ['test', 'imported'];
+        const response = rwgps.tagEvents(eventUrls, tags);
+        console.log('tag_events() response code:', response.getResponseCode());
+        const content = response.getContentText();
+        console.log('tag_events() response content:', content);
+        const newEventUrls = JSON.parse(content).events.map(e => 'https://ridewithgps.com/events/' + e.id);
+        console.log('Tagged event URLs:', newEventUrls);
+        // Clean up by deleting the events
+        rwgps.batch_delete_events(newEventUrls);
+    } catch (error) {
+        console.error('tag_events() error:', error);
     }
 }
 

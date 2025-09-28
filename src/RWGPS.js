@@ -251,22 +251,37 @@ class RWGPS {
 
   /**
    * Add the tags to the events. Both arrays must be non-empty. Idempotent.
-   * @param {string[]} event_urls - the array of event urls
+   * @param {PublicEventUrl[]} event_urls - the array of event urls
    * @param {string[]} tags - the tags
-   * @returns 
+   * @throws Exception if either array is empty
+   * @returns {HTTPResponse} the response from rwgpsService
    */
   tagEvents(event_urls, tags) {
+    if (!event_urls || event_urls.length === 0) {
+      throw new Error('No event URLs given');
+    }
+    if (!tags || tags.length === 0) {
+      throw new Error('No tags given');
+    } 
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
     return this.rwgpsService.tagEvents(event_ids, tags);
   }
   /**
    * Remove the tags from the events. Both arrays must be non-empty. Idempotent.
-   * @param {string[]} event_urls - the event urls
+   * @param {PublicEventUrl[]} event_urls - the event urls
    * @param {string[]} tags - the tags
+   * @throws Exception if either array is empty
+   * @returns {HTTPResponse} the response from rwgpsService
    */
   unTagEvents(event_urls, tags) {
+    if (!event_urls || event_urls.length === 0) {
+      throw new Error('No event URLs given');
+    }
+    if (!tags || tags.length === 0) {
+      throw new Error('No tags given');
+    } 
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
-    this.rwgpsService.unTagEvents(event_ids, tags);
+    return this.rwgpsService.unTagEvents(event_ids, tags);
   }
 
   /**
