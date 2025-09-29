@@ -340,7 +340,7 @@ class RWGPSService {
                 Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
             }
         }
-        return this.apiService.fetchPublicData(url, options);
+        return this.apiService.fetchUserData(url, options);
     }
 
     /**

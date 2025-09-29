@@ -227,7 +227,7 @@ function test_importRoute() {
     try {
         const foreignRoute = {
             url: 'https://ridewithgps.com/routes/19551869', // Dummy route ID
-            visibility: 0,
+            visibility: 2,
             name: 'TEST ROUTE - DELETE ME',
             expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
             tags: ['test', 'imported', 'test_import_route']

@@ -221,7 +221,7 @@ function testGetRoute() {
     const url = 'https://ridewithgps.com/routes/49027962'; // Dummy route ID
     try {
         const getResp = rwgpsService.getRoute(url);
-        console.log('getRoute called with apiService.getPublicData()');
+        console.log('getRoute called with apiService.getUserData()');
         console.log('getRoute response code:', getResp.getResponseCode());
         console.log('getRoute() response:', JSON.parse(getResp.getContentText()).name);
     } catch (error) {
