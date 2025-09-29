@@ -99,7 +99,6 @@ class ApiService {
             if (cookie.startsWith('_rwgps_3_session=')) {
                 const newCookie = cookie.split(';')[0];
                 if (this.webSessionCookie !== newCookie) {
-                    console.log(`Cookie updated: ${this.webSessionCookie || '(none)'} → ${newCookie}`);
                     this.webSessionCookie = newCookie;
                 }
                 break;
