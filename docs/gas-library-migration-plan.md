@@ -16,11 +16,12 @@ This guide outlines how to migrate a Google Apps Script (GAS) library into a mod
 1. Goals & Constraints
 2. High-level roadmap
 3. Adapter abstraction (fetch-like wrappers)
-4. Node adapter & dependency injection
-5. Jest setup and mock strategy
-6. Migration checklist and testing matrix
-7. Release and versioning recommendations
-8. Appendix: useful commands and snippets
+4. `muteHttpExceptions` error handling
+5. Node adapter & dependency injection
+6. Jest setup and mock strategy
+7. Migration checklist and testing matrix
+8. Release and versioning recommendations
+9. Appendix: useful commands and snippets
 
 ---
 
@@ -52,7 +53,41 @@ This guide outlines how to migrate a Google Apps Script (GAS) library into a mod
 
 ---
 
-## 4. Node adapter & dependency injection (Step 4)
+## 4. Error handling with `muteHttpExceptions` (Step 2)
+
+**Purpose:**
+
+* Ensure GAS requests do not throw exceptions on 4xx or 5xx responses.
+* Normalize error handling so `_wrapResponse()` can always process the response.
+
+**Implementation guidance:**
+
+* In GAS, always set `options.muteHttpExceptions = true` when preparing requests.
+* This can be done in `_prepareRequest()` or the adapter layer.
+* RWGPSService will interpret the OK/not OK response and throw an exception appropriately. 
+* The goal is to have RWGPSService completely hide the HTTP/HTTPResponse from RWGPS and higher code
+
+**Example:**
+
+```javascript
+request.options = Object.assign({}, request.options, { muteHttpExceptions: true });
+```
+
+**Testing:**
+
+* Make a request that is expected to fail (e.g., a 404 URL).
+* Confirm that the wrapped response returns `.status` correctly instead of throwing.
+* For batch requests, verify each response respects `muteHttpExceptions`.
+* In Node, the adapter can optionally emulate this behavior for consistency.
+
+**Notes:**
+
+* This step reduces risk in subsequent stages (wrapping responses, async migration).
+* Ensures error responses are handled uniformly across GAS and Node.
+
+---
+
+## 5. Node adapter & dependency injection (Step 4)
 
 * Implement `NodeFetchAdapter` using `node-fetch` (or `undici`), returning fetch-like responses.
 * Implement `GASFetchAdapter` for `UrlFetchApp`.
@@ -70,7 +105,7 @@ const api = new ApiService(creds, new NodeFetchAdapter());
 
 ---
 
-## 5. Jest setup and mock strategy (Step 5)
+## 6. Jest setup and mock strategy (Step 5)
 
 * Repository layout:
 
@@ -93,12 +128,13 @@ project/
 
 ---
 
-## 6. Migration checklist and testing matrix
+## 7. Migration checklist and testing matrix
 
 **Phase 1 — Stabilize in GAS**
 
 * Implement classes and GAS adapter.
 * Run smoke tests: login, public fetch, basic auth fetch, batch fetch.
+* Verify `muteHttpExceptions` works for expected failing requests.
 
 **Phase 2 — Add wrappers & adapt callers**
 
@@ -125,10 +161,11 @@ project/
 | Basic auth              |          ✓ |             mock |      optional live |
 | Public fetch            |          ✓ |             mock |                  ✓ |
 | Batch fetch             |          ✓ |       mock/array |      optional live |
+| Error responses         |          ✓ |             mock |      optional live |
 
 ---
 
-## 7. Release and versioning recommendations
+## 8. Release and versioning recommendations
 
 * Internal refactor → patch/minor release.
 * Response shape changes → minor release with consumer communication.
@@ -137,7 +174,7 @@ project/
 
 ---
 
-## 8. Appendix — useful commands and snippets
+## 9. Appendix — useful commands and snippets
 
 **Run Jest:**
 
@@ -169,4 +206,5 @@ npx jest --watch
 **Notes:**
 
 * Class-based design keeps auth + fetch logic in one place for easy adapter swapping.
-* Keep public API surface stable; use shims and deprecation warnings when breaking changes are unavoidable
+* `muteHttpExceptions` ensures error responses are captured uniformly.
+* Keep public API surface stable; use shims and deprecation warnings when breaking changes are unavoidable.
