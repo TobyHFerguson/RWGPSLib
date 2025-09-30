@@ -42,8 +42,11 @@ function testBatchDeleteEvents() {
         console.log('Event IDs to delete:', eventIds);
         const deleteResps = rwgpsService.batch_delete_events(eventIds);
         console.log('batch_delete_events called with this.apiService.fetchUserData()');
-        console.log(`batch_delete_events code: ` + deleteResps.getResponseCode());
-        console.log('batch_delete_events() response:', deleteResps.getContentText());
+        deleteResps.forEach((resp, i) => {
+            console.log(`batch_delete_events[${i}] code: ` + resp.getResponseCode());
+            console.log(`batch_delete_events[${i}] response: ` + resp.getContentText());
+        });
+        //
     } catch (error) {
         console.error('batch_delete_events() error:', error);
     }
@@ -79,23 +82,28 @@ function testCopyTemplate() {
         console.log('copy_template_ response code:', copyResp.getResponseCode());
         console.log('copy_template_() response:', copyResp.getContentText());
         console.log('copy_template_ response headers.Location:', copyResp.getAllHeaders().Location);
-        testDeleteEvent(copyResp.getAllHeaders().Location)
+        rwgpsService.deleteEvent(copyResp.getAllHeaders().Location)
     } catch (error) {
         console.error('copy_template_() error:', error);
     }
 }
 
-function testDeleteEvent(eventUrl) {
+function testDeleteEvent() {
     console.log('\n--- Test: deleteEvent() ---');
     const rwgpsService = getRWGPSService_();
     try {
-        const deleteResp = rwgpsService.deleteEvent(eventUrl);
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location
+        ]; // Dummy event ID
+        const deleteResps = rwgpsService.deleteEvent(eventUrls);
         console.log('deleteEvent called with apiService.fetchClubData()');
-        console.log('deleteEvent response code:', deleteResp.getResponseCode());
-        console.log('deleteEvent() response:', deleteResp.getContentText());
+        deleteResps.forEach((resp, i) => {
+            console.log(`deleteEvent[${i}] code: ` + resp.getResponseCode());
+            console.log(`deleteEvent[${i}] response: ` + resp.getContentText());
+        });
     } catch (error) {
-        console.error('deleteEvent() error:', error);
-    }
+    console.error('deleteEvent() error:', error);
+}
 }
 
 function testDeleteRoute(id) {
@@ -153,7 +161,7 @@ function testEditEvents() {
             console.log(`edit_events[${i}] response: ` + resp.getContentText());
         });
         const eventIds = [rwgpsService.extractIdFromUrl(newEventUrl1), rwgpsService.extractIdFromUrl(newEventUrl2)];
-        rwgpsService.batch_delete_events(eventIds); 
+        rwgpsService.batch_delete_events(eventIds);
     } catch (error) {
         console.error('editEvents() error:', error);
     }
