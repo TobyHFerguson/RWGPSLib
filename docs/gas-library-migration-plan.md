@@ -1,109 +1,172 @@
-# Google Apps Script → Node/Jest Migration Plan
+# Full Guide — GAS Library → Node/Jest Migration Plan (Class-Based Architecture)
 
-**Goal:**
-Migrate the Google Apps Script (GAS) library so that:
+**Purpose:**
+This guide outlines how to migrate a Google Apps Script (GAS) library into a modern, testable module that can run both as a GAS library in production and locally under Node with Jest for development and CI.
 
-* It continues to function as a **GAS library** in production.
-* It can also be tested locally using **Node + Jest**, with mocks for GAS-specific APIs such as `UrlFetchApp`, `PropertiesService`, etc.
+**Core idea:**
 
----
-
-## 🧭 Overview
-
-The migration happens in progressive, low-risk steps.
-Each step isolates GAS dependencies, modernizes code structure, and improves testability.
-
-| Step | Focus                                | Risk           | Testing          | Release Cycle |
-| ---- | ------------------------------------ | -------------- | ---------------- | ------------- |
-| 1    | Introduce adapters                   | Low            | Smoke test       | Optional      |
-| 2    | Normalize error handling             | Medium         | Targeted         | Minor         |
-| 3    | Wrap responses in fetch-like objects | Medium–High    | Targeted         | Minor/Major   |
-| 4    | Switch library API to async/Promise  | High           | Full regression  | Major         |
-| 5    | Introduce Jest mocks                 | Low (dev only) | Verify Jest runs | None          |
-| 6    | Migrate cookies → Bearer tokens      | High           | End-to-end       | Full          |
+* Separate HTTP requests, authentication, and session state into an `ApiService` class.
+* Centralize credential management with a `CredentialManager` class.
+* Isolate GAS-specific code so the majority of the library is portable and testable.
 
 ---
 
-## Step 1 – Introduce Adapters
+## Table of contents
 
-**Change:**
-Create adapter functions that wrap direct GAS APIs.
-
-```js
-// adapters/gasAdapters.js
-function gasFetch(url, options) {
-  return UrlFetchApp.fetch(url, options);
-}
-
-function gasFetchAll(requests) {
-  return UrlFetchApp.fetchAll(requests);
-}
-
-export { gasFetch, gasFetchAll };
-```
-
-Then replace calls in your library:
-
-```js
-// Before:
-const response = UrlFetchApp.fetch(url, options);
-
-// After:
-const response = gasFetch(url, options);
-```
-
-**Why:**
-Centralizes `UrlFetchApp` usage, making later replacement with Node-compatible code easy.
-
-**Risk:** Very low
-**Testing:** Quick smoke test that consumers still work.
-**Release:** Optional patch bump.
+1. Goals & Constraints
+2. High-level roadmap
+3. Adapter abstraction (fetch-like wrappers)
+4. Node adapter & dependency injection
+5. Jest setup and mock strategy
+6. Migration checklist and testing matrix
+7. Release and versioning recommendations
+8. Appendix: useful commands and snippets
 
 ---
 
-## Step 2 – Normalize Error Handling
+## 1. Goals & Constraints
 
-**Change:**
-Always use `muteHttpExceptions: true` so that requests return response objects rather than throwing.
-
-```js
-function gasFetch(url, options = {}) {
-  const opts = { muteHttpExceptions: true, ...options };
-  return UrlFetchApp.fetch(url, opts);
-}
-```
-
-**Why:**
-Matches Node’s `fetch()` behavior (no exceptions for 4xx/5xx responses).
-
-**Risk:** Medium
-**Testing:** Try known failing URLs to confirm consistent handling.
-**Release:** Minor version bump.
+* **Keep production behavior**: The library must continue to run as a GAS library.
+* **Enable local development**: Allow running unit tests with Jest/Node without calling GAS APIs.
+* **Minimal API surface changes**: Prefer internal refactors over breaking public APIs.
+* **Security**: Use Script Properties in GAS and environment variables for Node; do not commit secrets.
 
 ---
 
-## Step 3 – Wrap Responses in Fetch-Like Objects
+## 2. High-level roadmap
 
-**Change:**
-Return objects that mimic the Web Fetch API.
+1. Introduce `ApiService` + `CredentialManager` classes; move all `UrlFetchApp` usage into the service.
+2. Add fetch-like response wrappers (status, ok, text(), json()).
+3. Create a `FetchAdapter` abstraction with `GASFetchAdapter` and `NodeFetchAdapter`.
+4. Make `ApiService` accept a `fetchAdapter` via dependency injection.
+5. Add Jest tests, mocking the fetch adapter for unit tests.
+6. (Optional) Migrate auth from cookies to bearer tokens for a cleaner API.
 
-```js
-function gasFetch(url, options = {}) {
-  const opts = { muteHttpExceptions: true, ...options };
-  const res = UrlFetchApp.fetch(url, opts);
+---
 
-  return {
-    status: res.getResponseCode(),
-    ok: res.getResponseCode() >= 200 && res.getResponseCode() < 300,
-    text: () => res.getContentText(),
-    json: () => JSON.parse(res.getContentText()),
-    headers: res.getAllHeaders(),
-  };
+## 3. Adapter abstraction (Step 3)
+
+* `_wrapResponse()` ensures that responses behave like the standard Web fetch API.
+* Consumers read `.status`, `.ok`, `.text()`, `.json()` instead of GAS-specific methods.
+* Transitional compatibility layers can be added if needed.
+
+---
+
+## 4. Node adapter & dependency injection (Step 4)
+
+* Implement `NodeFetchAdapter` using `node-fetch` (or `undici`), returning fetch-like responses.
+* Implement `GASFetchAdapter` for `UrlFetchApp`.
+* Inject the adapter into `ApiService` so the same service code can run on GAS or Node.
+
+**Example usage:**
+
+```javascript
+// GAS
+const api = new ApiService(creds, new GASFetchAdapter());
+
+// Node
+const api = new ApiService(creds, new NodeFetchAdapter());
+```
+
+---
+
+## 5. Jest setup and mock strategy (Step 5)
+
+* Repository layout:
+
+```
+project/
+  src/
+    ApiService.js
+    CredentialManager.js
+    adapters/
+      GASFetchAdapter.js
+      NodeFetchAdapter.js
+  tests/
+    apiService.test.js
+  package.json
+  jest.config.js
+```
+
+* Jest configuration is minimal, just set `testEnvironment` to `node`.
+* Mock the fetch adapter in tests to simulate HTTP responses without hitting real endpoints.
+
+---
+
+## 6. Migration checklist and testing matrix
+
+**Phase 1 — Stabilize in GAS**
+
+* Implement classes and GAS adapter.
+* Run smoke tests: login, public fetch, basic auth fetch, batch fetch.
+
+**Phase 2 — Add wrappers & adapt callers**
+
+* Introduce `_wrapResponse()`.
+* Update consumer code to use `.status` / `.text()` / `.json()`.
+
+**Phase 3 — Node adapter & tests**
+
+* Implement `NodeFetchAdapter`.
+* Inject adapter for Jest and Node integration tests.
+* Add unit tests covering critical paths.
+
+**Phase 4 — Auth migration (optional)**
+
+* Switch to bearer token auth.
+* Update `_prepareRequest()`.
+* Run full end-to-end tests with live endpoints.
+
+**Testing matrix**
+
+| Area                    | GAS (live) | Node (Jest unit) | Node (integration) |
+| ----------------------- | ---------: | ---------------: | -----------------: |
+| Login / cookie handling |          ✓ |             mock |      optional live |
+| Basic auth              |          ✓ |             mock |      optional live |
+| Public fetch            |          ✓ |             mock |                  ✓ |
+| Batch fetch             |          ✓ |       mock/array |      optional live |
+
+---
+
+## 7. Release and versioning recommendations
+
+* Internal refactor → patch/minor release.
+* Response shape changes → minor release with consumer communication.
+* Async call style or auth model changes → major release.
+* Use staged releases: canary/internal consumer test → public release.
+
+---
+
+## 8. Appendix — useful commands and snippets
+
+**Run Jest:**
+
+```bash
+npm install
+npm test
+# or
+npx jest --watch
+```
+
+**Local secrets for Node tests:**
+
+```json
+{
+  "rwgps_username": "alice",
+  "rwgps_password": "secret",
+  "rwgps_api_key": "abc",
+  "rwgps_auth_token": "def"
 }
 ```
 
-**Why:**
-Brings your API closer to Node’s `fetch()` model; same code can run in both environments.
+**Search/replace guidance:**
 
-**Risk:** Medium–high
-**Testing:** Verify pl
+* Find `getResponseCode()` usages: `rg "getResponseCode\(" -n`
+* Replace with `.status` usage (manual review recommended).
+
+---
+
+**Notes:**
+
+* Class-based design keeps auth + fetch logic in one place for easy adapter swapping.
+* Keep public API surface stable; use shims and deprecation warnings when breaking changes are unavoidable
