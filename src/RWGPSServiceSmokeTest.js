@@ -223,7 +223,7 @@ function testGetRoute() {
         const getResp = rwgpsService.getRoute(url);
         console.log('getRoute called with apiService.getUserData()');
         console.log('getRoute response code:', getResp.getResponseCode());
-        console.log('getRoute() response:', JSON.parse(getResp.getContentText()).name);
+        console.log('getRoute() response:', JSON.parse(getResp.getContentText()).route.name);
     } catch (error) {
         console.error('getRoute() error:', error);
     }

@@ -340,7 +340,9 @@ class RWGPSService {
                 Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
             }
         }
-        return this.apiService.fetchUserData(url, options);
+        const routeUrl = 'https://ridewithgps.com/api/v1/routes/' + this.extractIdFromUrl(url) + '.json';
+        const response = this.apiService.fetchClubData(routeUrl, options);
+        return response;
     }
 
     /**
