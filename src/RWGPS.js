@@ -33,8 +33,7 @@ class RWGPS {
    * @throws Exception if there's an error
    */
   batch_delete_events(event_urls) {
-    let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
-    return this.rwgpsService.batch_delete_events(event_ids);
+    return this.rwgpsService.batch_delete_events(event_urls);
   }
 
   /**
@@ -126,7 +125,7 @@ class RWGPS {
     return events;
   }
 
- 
+
   /**
      * 
      * @param {string[]} names - list of ride leader names
@@ -420,7 +419,7 @@ class RWGPS {
     }
     if (!tags || tags.length === 0) {
       throw new Error('No tags given');
-    } 
+    }
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
     return this.rwgpsService.tagEvents(event_ids, tags);
   }
@@ -438,7 +437,7 @@ class RWGPS {
     }
     if (!tags || tags.length === 0) {
       throw new Error('No tags given');
-    } 
+    }
     let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
     return this.rwgpsService.unTagEvents(event_ids, tags);
   }

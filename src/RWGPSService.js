@@ -90,36 +90,23 @@ class RWGPSService {
 
     /**
      * Delete multiple events
-     * @param{string[]} event_ids - an array containing the ids of the events to delete
-     * @returns {object} the response object which contains an array of the deleted events
+     * @param {PublicEventUrl | PublicEventUrl[]} event_urls
+     *  - an array containing the public URLs of the events to delete
+     * @returns {HttpResponse | HttpResponse[]} the response object(s) corresponding to the deleted events
      */
     //TODO - take an array of public event URLs
-    batch_delete_events(event_ids) {
-        let url = "https://ridewithgps.com/events/batch_destroy.json";
-        const payload = { event_ids: event_ids.join() }
-        const options = {
-            payload: payload
-        }
-        return this.apiService.fetchUserData(url, options);
+    batch_delete_events(event_urls) {
+        return this.deleteEvent(event_urls);
     }
 
     /**
      * Delete multiple routes
-     * @param {PublicRouteUrl[]} route_urls - an array containing the ids of the routes to delete
-     * @returns {HttpResponse} the response object which contains an array of the deleted routes
+     * @param {PublicRouteUrl | PublicRouteUrl[]} route_urls - an array containing the public URLs of the routes to delete
+     * @returns {HttpResponse | HttpResponse[]} the response object(s) corresponding to the deleted routes
      */
     //TODO - take an array of public route URLs
     batch_delete_routes(route_urls) {
-        if (!Array.isArray(route_urls) || route_urls.length === 0) {
-            throw new Error('Invalid route URLs');
-        }
-        const route_ids = route_urls.map(url => this.extractIdFromUrl(url));
-        let url = "https://ridewithgps.com/routes/batch_destroy.json";
-        const payload = { route_ids: route_ids.join(',') }
-        const options = {
-            payload: payload
-        }
-        return this.apiService.fetchUserData(url, options);
+        return this.deleteRoute(route_urls)
     }
 
     /**
@@ -151,41 +138,55 @@ class RWGPSService {
     }
 
     /**
-     * Delete an event
-     * @param {PublicEventUrl} event_url
-     * @returns {HttpResponse} the response object
+     * Delete one or more events
+     * @param {PublicEventUrl | PublicEventUrl[]} event_urls
+     * @returns {HttpResponse[]} the response objects
      */
-    deleteEvent(event_url) {
-        if (!this._isPublicEventUrl(event_url)) {
-            throw new Error(`Invalid public event URL: ${event_url}`);
+    deleteEvent(event_urls) {
+        if (!Array.isArray(event_urls)) {
+            event_urls = [event_urls];
         }
+        event_urls.forEach(url => {
+            if (!this._isPublicEventUrl(url)) {
+                throw new Error(`Invalid public event URL: ${url}`);
+            }
+        })
         // DELETE to https://ridewithgps.com/api/v1/events/403834.json
         // where 403834 is the event ID extracted from the event_url
-        const id = this.extractIdFromUrl(event_url);
-        const url = `https://ridewithgps.com/api/v1/events/${id}.json`
-        const options = {
-            method: 'delete',
-        }
-        return this.apiService.fetchClubData(url, options);
+        const requests = event_urls.map(url => {
+            const id = this.extractIdFromUrl(url);
+            return {
+                url: `https://ridewithgps.com/api/v1/events/${id}.json`,
+                method: 'delete',
+            }
+        })
+        const responses = this.apiService.fetchClubData(requests);
+        return (responses.length === 1) ? responses[0] : responses;
     }
 
     /**
-     * Delete a single route by url
-     * @param {PublicRouteUrl} url - the public route URL to delete
-     * @returns {object} the response object
+     * Delete one or more routes
+     * @param {PublicRouteUrl | PublicRouteUrl[]} routeUrls - the public route URL(s) to delete
+     * @returns {HttpResponse | HttpResponse[]} the response object(s)
      */
-    deleteRoute(url) {
-        if (!this._isPublicRouteUrl(url)) {
-            throw new Error('Route URL is required');
+    deleteRoute(routeUrls) {
+        if (!Array.isArray(routeUrls)) {
+            routeUrls = [routeUrls];
         }
-        const id = this.extractIdFromUrl(url);
-        const routeUrl = `https://ridewithgps.com/api/v1/routes/${id}.json`;
-        const options = {
-            method: 'delete',
-            followRedirects: false,
-            muteHttpExceptions: false
-        }
-        return this.apiService.fetchClubData(routeUrl, options);
+        routeUrls.forEach(url => {
+            if (!this._isPublicRouteUrl(url)) {
+                throw new Error('Invalid public route URL: ' + url);
+            }
+        });
+        const requests = routeUrls.map(url => {
+            const id = this.extractIdFromUrl(url);
+            return {
+                url: `https://ridewithgps.com/api/v1/routes/${id}.json`,
+                method: 'delete',
+            }
+        });
+        const responses = this.apiService.fetchClubData(requests);
+        return (responses.length === 1) ? responses[0] : responses;
     }
 
     /**
@@ -300,6 +301,7 @@ class RWGPSService {
         }
         const id = this.extractIdFromUrl(url);
         const event_url = `https://ridewithgps.com/api/v1/events/${id}.json`;
+        console.log('Event URL is:', event_url);
         return this.apiService.fetchClubData(event_url);
     }
 
@@ -340,7 +342,10 @@ class RWGPSService {
                 Accept: "application/json" // Note use of Accept header - returns a 404 otherwise. 
             }
         }
-        return this.apiService.fetchUserData(url, options);
+        const routeUrl = 'https://ridewithgps.com/api/v1/routes/' + this.extractIdFromUrl(url) + '.json';
+        console.log('Route URL is:', routeUrl);
+        const response = this.apiService.fetchClubData(routeUrl, options);
+        return response;
     }
 
     /**

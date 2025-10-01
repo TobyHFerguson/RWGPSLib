@@ -38,12 +38,14 @@ function testBatchDeleteEvents() {
     try {
         const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
         rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
-        const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
         console.log('Event IDs to delete:', eventIds);
-        const deleteResps = rwgpsService.batch_delete_events(eventIds);
+        const deleteResps = rwgpsService.batch_delete_events(eventUrls);
         console.log('batch_delete_events called with this.apiService.fetchUserData()');
-        console.log(`batch_delete_events code: ` + deleteResps.getResponseCode());
-        console.log('batch_delete_events() response:', deleteResps.getContentText());
+        deleteResps.forEach((resp, i) => {
+            console.log(`batch_delete_events[${i}] code: ` + resp.getResponseCode());
+            console.log(`batch_delete_events[${i}] response: ` + resp.getContentText());
+        });
+        //
     } catch (error) {
         console.error('batch_delete_events() error:', error);
     }
@@ -61,10 +63,13 @@ function testBatchDeleteRoutes() {
             tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
         })].map(resp => JSON.parse(resp.getContentText()).url);
         console.log('Route URLs to delete:', routeUrls);
-        const deleteResps = rwgpsService.batch_delete_routes(routeUrls);
         console.log('batch_delete_routes called with this.apiService.fetchUserData()');
-        console.log(`batch_delete_routes code: ` + deleteResps.getResponseCode());
-        console.log('batch_delete_routes() response:', deleteResps.getContentText());
+        const deleteResps = rwgpsService.batch_delete_routes(routeUrls);
+        deleteResps.forEach((resp, i) => {
+            console.log(`batch_delete_routes[${i}] code: ` + resp.getResponseCode());
+            console.log(`batch_delete_routes[${i}] response: ` + resp.getContentText());
+        });
+        //
     } catch (error) {
         console.error('batch_delete_routes() error:', error);
     }
@@ -79,32 +84,48 @@ function testCopyTemplate() {
         console.log('copy_template_ response code:', copyResp.getResponseCode());
         console.log('copy_template_() response:', copyResp.getContentText());
         console.log('copy_template_ response headers.Location:', copyResp.getAllHeaders().Location);
-        testDeleteEvent(copyResp.getAllHeaders().Location)
+        rwgpsService.deleteEvent(copyResp.getAllHeaders().Location)
     } catch (error) {
         console.error('copy_template_() error:', error);
     }
 }
 
-function testDeleteEvent(eventUrl) {
+function testDeleteEvent() {
     console.log('\n--- Test: deleteEvent() ---');
     const rwgpsService = getRWGPSService_();
     try {
-        const deleteResp = rwgpsService.deleteEvent(eventUrl);
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location
+        ]; // Dummy event ID
+        const deleteResps = rwgpsService.deleteEvent(eventUrls);
         console.log('deleteEvent called with apiService.fetchClubData()');
-        console.log('deleteEvent response code:', deleteResp.getResponseCode());
-        console.log('deleteEvent() response:', deleteResp.getContentText());
+        deleteResps.forEach((resp, i) => {
+            console.log(`deleteEvent[${i}] code: ` + resp.getResponseCode());
+            console.log(`deleteEvent[${i}] response: ` + resp.getContentText());
+        });
     } catch (error) {
         console.error('deleteEvent() error:', error);
     }
 }
 
-function testDeleteRoute(id) {
+function testDeleteRoute() {
     console.log('\n--- Test: deleteRoute() ---');
     const rwgpsService = getRWGPSService_();
     try {
-        const deleteResp = rwgpsService.deleteRoute(id); // Use a non-existent route ID for safe testing
+        const importResps = [rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        }), rwgpsService.importRoute({
+            url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
+            tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
+        })]; // Dummy route ID
+        const routeUrls = importResps.map(importResp => JSON.parse(importResp.getContentText()).url);
+        const deleteResps = rwgpsService.deleteRoute(routeUrls); // Use a non-existent route ID for safe testing
         console.log('deleteRoute called with apiService.getClubData()')
-        console.log('deleteRoute response code:', deleteResp.getResponseCode());
+        deleteResps.forEach((resp, i) => {
+            console.log(`deleteRoute[${i}] code: ` + resp.getResponseCode());
+            console.log(`deleteRoute[${i}] response: ` + resp.getContentText());
+        });
     } catch (error) {
         console.error('deleteRoute() error:', error);
     }
@@ -153,7 +174,7 @@ function testEditEvents() {
             console.log(`edit_events[${i}] response: ` + resp.getContentText());
         });
         const eventIds = [rwgpsService.extractIdFromUrl(newEventUrl1), rwgpsService.extractIdFromUrl(newEventUrl2)];
-        rwgpsService.batch_delete_events(eventIds); 
+        rwgpsService.batch_delete_events(eventIds);
     } catch (error) {
         console.error('editEvents() error:', error);
     }
@@ -223,7 +244,7 @@ function testGetRoute() {
         const getResp = rwgpsService.getRoute(url);
         console.log('getRoute called with apiService.getUserData()');
         console.log('getRoute response code:', getResp.getResponseCode());
-        console.log('getRoute() response:', JSON.parse(getResp.getContentText()).name);
+        console.log('getRoute() response:', JSON.parse(getResp.getContentText()).route.name);
     } catch (error) {
         console.error('getRoute() error:', error);
     }
@@ -240,7 +261,7 @@ function testImportRoute() {
         console.log('importRoute called with this.apiService.fetchUserData()');
         console.log('importRoute response code:', importResp.getResponseCode());
         console.log('importRoute() response id:', JSON.parse(importResp.getContentText()).id);
-        testDeleteRoute(JSON.parse(importResp.getContentText()).url);
+        rwgpsService.deleteRoute(JSON.parse(importResp.getContentText()).url);
     } catch (error) {
         console.error('importRoute() error:', error);
         console.log('Skipping deleteRoute() test due to importRoute() failure.');
