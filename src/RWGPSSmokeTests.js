@@ -59,12 +59,12 @@ function test_batch_delete_events() {
     try {
         const eventUrls = [rwgps.copy_template_(globals.A_TEMPLATE),
         rwgps.copy_template_(globals.A_TEMPLATE)];
-        const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
-        console.log('Event IDs to delete:', eventIds);
+        console.log('Event URLs to delete:', eventUrls);
         const deleteResps = rwgps.batch_delete_events(eventUrls);
-        console.log('batch_delete_events response code:', deleteResps.getResponseCode());
-        const deletedEventIds = JSON.parse(deleteResps.getContentText()).events.map(e => e.id);
-        console.log('Deleted event IDs:', deletedEventIds);
+        deleteResps.forEach((resp, i) => {
+            console.log(`batch_delete_events[${i}] code: ` + resp.getResponseCode());
+            console.log(`batch_delete_events[${i}] response: ` + resp.getContentText());
+        });
     } catch (error) {
         console.error('batch_delete_events() error:', error);
     }
@@ -90,11 +90,10 @@ function test_batch_delete_routes() {
         })]
         console.log('Route Urls to delete:', routeUrls);
         const deleteResps = rwgps.batch_delete_routes(routeUrls);
-        console.log('batch_delete_routes response code:', deleteResps.getResponseCode());
-        const content = deleteResps.getContentText();
-        console.log('batch_delete_routes response content:', content);
-        const deletedRouteIds = JSON.parse(content).routes.map(r => r.id);
-        console.log('Deleted route IDs:', deletedRouteIds);
+        deleteResps.forEach((resp, i) => {
+            console.log(`batch_delete_routes[${i}] code: ` + resp.getResponseCode());
+            console.log(`batch_delete_routes[${i}] response: ` + resp.getContentText());
+        });
     } catch (error) {
         console.error('batch_delete_routes() error:', error);
     }

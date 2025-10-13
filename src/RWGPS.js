@@ -390,8 +390,7 @@ class RWGPS {
           // no-op! We've not got an expiration date but we've been told only to extend!
         } else {
           // No expiration date, but we're not extending, so add a new tag
-          const id = localRoute.url.split('/')[4].split('-')[0];
-          this.rwgpsService.tagRoutes([id], localRoute.tags);
+          this.rwgpsService.tagRoutes([localRoute.url], localRoute.tags);
         }
       } else {
         // we have an expiration tag; extend_only doesn't matter here; We'll replace the tag.
@@ -408,38 +407,22 @@ class RWGPS {
 
   /**
    * Add the tags to the events. Both arrays must be non-empty. Idempotent.
-   * @param {PublicEventUrl[]} event_urls - the array of event urls
-   * @param {string[]} tags - the tags
-   * @throws Exception if either array is empty
+   * @param {PublicEventUrl | PublicEventUrl[]} event_urls - the array of event urls
+   * @param {string | string[]} tags - the tags
    * @returns {HTTPResponse} the response from rwgpsService
    */
   tagEvents(event_urls, tags) {
-    if (!event_urls || event_urls.length === 0) {
-      throw new Error('No event URLs given');
-    }
-    if (!tags || tags.length === 0) {
-      throw new Error('No tags given');
-    }
-    let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
-    return this.rwgpsService.tagEvents(event_ids, tags);
+    return this.rwgpsService.tagEvents(event_urls, tags);
   }
 
   /**
    * Remove the tags from the events. Both arrays must be non-empty. Idempotent.
-   * @param {PublicEventUrl[]} event_urls - the event urls
-   * @param {string[]} tags - the tags
-   * @throws Exception if either array is empty
+   * @param {PublicEventUrl | PublicEventUrl[]} event_urls - the event urls
+   * @param {string | string[]} tags - the tags
    * @returns {HTTPResponse} the response from rwgpsService
    */
   unTagEvents(event_urls, tags) {
-    if (!event_urls || event_urls.length === 0) {
-      throw new Error('No event URLs given');
-    }
-    if (!tags || tags.length === 0) {
-      throw new Error('No tags given');
-    }
-    let event_ids = event_urls.map(e => e.split('/')[4].split('-')[0]);
-    return this.rwgpsService.unTagEvents(event_ids, tags);
+    return this.rwgpsService.unTagEvents(event_urls, tags);
   }
 }
 

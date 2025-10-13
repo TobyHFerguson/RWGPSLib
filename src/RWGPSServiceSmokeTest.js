@@ -38,7 +38,7 @@ function testBatchDeleteEvents() {
     try {
         const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
         rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
-        console.log('Event IDs to delete:', eventIds);
+        console.log('Event URLs to delete:', eventUrls);
         const deleteResps = rwgpsService.batch_delete_events(eventUrls);
         console.log('batch_delete_events called with this.apiService.fetchUserData()');
         deleteResps.forEach((resp, i) => {
@@ -173,10 +173,21 @@ function testEditEvents() {
             console.log(`edit_events[${i}] code: ` + resp.getResponseCode());
             console.log(`edit_events[${i}] response: ` + resp.getContentText());
         });
-        const eventIds = [rwgpsService.extractIdFromUrl(newEventUrl1), rwgpsService.extractIdFromUrl(newEventUrl2)];
-        rwgpsService.batch_delete_events(eventIds);
+        const eventUrls = [newEventUrl1, newEventUrl2];
+        rwgpsService.batch_delete_events(eventUrls);
     } catch (error) {
         console.error('editEvents() error:', error);
+    }
+}
+
+function testEmptyEditEvents() {
+    console.log('\n--- Test: editEvents() with empty array ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        rwgpsService.edit_events([]);
+        console.log('edit_events handled the empty array correctly.');
+    } catch (error) {
+        console.error('edit_events with empty array error:', error);    
     }
 }
 
@@ -206,6 +217,21 @@ function testGetAll() {
         });
     } catch (error) {
         console.error('getAll() error:', error);
+    }
+}
+
+function testGetAllEmpty() {
+    console.log('\n--- Test: getAll() with empty array ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        const responses = rwgpsService.getAll([]);
+        if (Array.isArray(responses) && responses.length === 0) {
+            console.log('getAll handled the empty array correctly, returned empty array.');
+        } else {
+            console.error('getAll with empty array did not return an empty array as expected.');
+        }
+    } catch (error) {
+        console.error('getAll with empty array error:', error);    
     }
 }
 
@@ -275,15 +301,41 @@ function testTagEvents() {
     try {
         const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
         rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
-        const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
-        console.log('Event IDs to tag:', eventIds);
-        const tagResp = rwgpsService.tagEvents(eventIds, ['test', 'template']);
+        console.log('Event URLs to tag:', eventUrls);
+        const tagResp = rwgpsService.tagEvents(eventUrls, ['test', 'template']);
         console.log('tagEvents called with this.apiService.fetchUserData()');
         console.log(`tagEvents code: ` + tagResp.getResponseCode());
         console.log('tagEvents() response:', tagResp.getContentText());
-        rwgpsService.batch_delete_events(eventIds);
+        rwgpsService.batch_delete_events(eventUrls);
     } catch (error) {
         console.error('tagEvents() error:', error);
+    }
+}
+
+function testTagNoEvents() {
+    console.log('\n--- Test: tagEvents() with empty array ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        const tagResp = rwgpsService.tagEvents([], ['test', 'template']);
+        console.log('tagEvents response code:', tagResp.getResponseCode());
+        console.log('tagEvents response text:', tagResp.getContentText());  
+    } catch (error) {
+        console.error('tagEvents with empty array error:', error);    
+    }
+}
+
+function testTagEventsNoTags() {
+    console.log('\n--- Test: tagEvents() with empty tags array ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
+        const tagResp = rwgpsService.tagEvents(eventUrls, []);
+        console.log('tagEvents response code:', tagResp.getResponseCode());
+        console.log('tagEvents response text:', tagResp.getContentText());  
+        rwgpsService.batch_delete_events(eventUrls);
+    } catch (error) {
+        console.error('tagEvents with empty tags array error:', error);    
     }
 }
 
@@ -298,9 +350,8 @@ function testTagRoutes() {
             url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
             tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
         })].map(resp => JSON.parse(resp.getContentText()).url);
-        const routeIds = routeUrls.map(url => rwgpsService.extractIdFromUrl(url));
-        console.log('Route IDs to tag:', routeIds);
-        const tagResp = rwgpsService.tagRoutes(routeIds, ['test', 'template']);
+        console.log('Route URLs to tag:', routeUrls);
+        const tagResp = rwgpsService.tagRoutes(routeUrls, ['test', 'template']);
         console.log('tagRoutes called with this.apiService.fetchUserData()');
         console.log(`tagRoutes code: ` + tagResp.getResponseCode());
         console.log('tagRoutes() response:', tagResp.getContentText());
@@ -316,15 +367,29 @@ function testUntagEvents() {
     try {
         const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
         rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
-        const eventIds = eventUrls.map(url => rwgpsService.extractIdFromUrl(url));
-        console.log('Event IDs to untag:', eventIds);
-        const untagResp = rwgpsService.unTagEvents(eventIds, ['template']);
+        console.log('Event URLs to untag:', eventUrls);
+        const untagResp = rwgpsService.unTagEvents(eventUrls, ['template']);
         console.log('unTagEvents called with this.apiService.fetchUserData()');
         console.log(`unTagEvents code: ` + untagResp.getResponseCode());
         console.log('unTagEvents() response:', untagResp.getContentText());
-        rwgpsService.batch_delete_events(eventIds);
+        rwgpsService.batch_delete_events(eventUrls);
     } catch (error) {
         console.error('unTagEvents() error:', error);
+    }
+}
+
+function testUntagEventNoTags() {
+    console.log('\n--- Test: untagEvents() with empty tags array ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        const eventUrls = [rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location,
+        rwgpsService.copy_template_(A_TEMPLATE_URL).getAllHeaders().Location];
+        const untagResp = rwgpsService.unTagEvents(eventUrls, []);
+        console.log('unTagEvents response code:', untagResp.getResponseCode());
+        console.log('unTagEvents response text:', untagResp.getContentText());  
+        rwgpsService.batch_delete_events(eventUrls);
+    } catch (error) {
+        console.error('unTagEvents with empty tags array error:', error);    
     }
 }
 
@@ -339,10 +404,9 @@ function testUntagRoutes() {
             url: 'https://ridewithgps.com/routes/19551869', visibility: 2, name: "Toby's Tagged route", expiry: '12/24/2022',
             tags: ['Tobys Tag'], fargle: 'wargle'  // Extra field to test robustness
         })].map(resp => JSON.parse(resp.getContentText()).url);
-        const routeIds = routeUrls.map(url => rwgpsService.extractIdFromUrl(url));
-        rwgpsService.tagRoutes(routeIds, ['test', 'template']);
-        console.log('Route IDs to untag:', routeIds);
-        const untagResp = rwgpsService.unTagRoutes(routeIds, ['template']);
+        rwgpsService.tagRoutes(routeUrls, ['test', 'template']);
+        console.log('Route URLs to untag:', routeUrls);
+        const untagResp = rwgpsService.unTagRoutes(routeUrls, ['template']);
         console.log('unTagRoutes called with this.apiService.fetchUserData()');
         console.log(`unTagRoutes code: ` + untagResp.getResponseCode());
         console.log('unTagRoutes() response:', untagResp.getContentText());
