@@ -13,15 +13,32 @@ class RWGPSService {
      * @param{!string} resource - the kind of resource to be operated on, one of 'event' or 'route'
     */
     _batch_update_tags(ids, tag_action, tags, resource) {
-        if (ids.length > 0 && tags.length > 0) {
-            const url = `https://ridewithgps.com/${resource}s/batch_update_tags.json`;
-            const payload = { tag_action, tag_names: tags.join() };
-            payload[`${resource}_ids`] = ids.join();
-            const options = {
-                payload: payload
-            }
-            return this.apiService.fetchUserData(url, options);
+        if (!ids) {
+            throw new Error('ids is required');
         }
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        if (!tags) {
+            throw new Error('tags is required');
+        }
+        if (!Array.isArray(tags)) {
+            tags = [tags];
+        }
+        if (tag_action !== 'add' && tag_action !== 'remove') {
+            throw new Error(`Invalid tag_action: ${tag_action}`);
+        }
+        if (resource !== 'event' && resource !== 'route') {
+            throw new Error(`Invalid resource: ${resource}`);
+        }   
+        const url = `https://ridewithgps.com/${resource}s/batch_update_tags.json`;
+        const payload = { tag_action, tag_names: tags.join() };
+        payload[`${resource}_ids`] = ids.join();
+        const options = {
+            payload: payload,
+            muteHttpExceptions: true
+        }
+        return this.apiService.fetchUserData(url, options);
     }
 
     /**
@@ -220,8 +237,8 @@ class RWGPSService {
      * @returns {HttpResponse[]} - an array of response objects for each event edit
      */
     edit_events(eventEditObjects) {
-        if (!Array.isArray(eventEditObjects) || eventEditObjects.length === 0) {
-            throw new Error('eventEditObjects must be a non-empty array');
+        if (!Array.isArray(eventEditObjects)) {
+            throw new Error('eventEditObjects must be an array');
         }
         const self = this;
         function createRequest(eventEditObject) {
@@ -273,8 +290,8 @@ class RWGPSService {
      * @returns {HttpResponse[]} - an array of response objects
      */
     getAll(urls, override = {}) {
-        if (!Array.isArray(urls) || urls.length === 0) {
-            throw new Error('urls must be a non-empty array');
+        if (!Array.isArray(urls)) {
+            throw new Error('urls must be an array');
         }
         const requests = urls.map(url => {
             let r = {
@@ -374,37 +391,73 @@ class RWGPSService {
 
     /**
      * Add multiple tags to multiple events - idempotent
-     * @param{NumberLike[]} ids - an array containing the ids of the events to add the tags to
-     * @param{string[]} tags - an array of the tags to be added to the events
+     * @param{!(PublicEventUrl | PublicEventUrl[])} urls - an id or an array of ids of the resources to be tagged
+     * @param{!(string | string[])} tags - an optional tag or array of tags
      */
-    tagEvents(ids, tags) {
+    tagEvents(urls, tags) {
+        if (!Array.isArray(urls)) {
+            urls = [urls];
+        }
+        const ids = urls.map(url => {
+            if (!this._isPublicEventUrl(url)) {
+                throw new Error(`Invalid public event URL: ${url}`);
+            }
+            return this.extractIdFromUrl(url);
+        });
         return this._batch_update_tags(ids, "add", tags, 'event');
     }
 
     /**
       * Add multiple tags to multiple routes - idempotent
-      * @param{NumberLike[]} ids - an array containing the ids of the routes to add the tags to
-      * @param{string[]} tags - an array of the tags to be added to the routes
+    * @param{!(PublicRouteUrl | PublicRouteUrl[])} urls - an id or an array of ids of the resources to be tagged
+     * @param{!(string | string[])} tags - an optional tag or array of tags
       */
-    tagRoutes(ids, tags) {
+    tagRoutes(urls, tags) {
+        if (!Array.isArray(urls)) {
+            urls = [urls];
+        }
+        const ids = urls.map(url => {
+            if (!this._isPublicRouteUrl(url)) {
+                throw new Error(`Invalid public route URL: ${url}`);
+            }
+            return this.extractIdFromUrl(url);
+        });
         return this._batch_update_tags(ids, "add", tags, 'route');
     }
 
     /**
      * remove multiple tags from multiple events - idempotent
-     * @param{NumberLike[]} ids - an array containing the ids of the events to remove the tags from
-     * @param{string[]} tags - an array of the tags to be removed from the events
+     * @param{!(PublicEventUrl | PublicEventUrl[])} urls - an id or an array of ids of the resources to be tagged
+     * @param{!(string | string[])} tags - an optional tag or array of tags
      */
-    unTagEvents(ids, tags) {
+    unTagEvents(urls, tags) {
+        if (!Array.isArray(urls)) {
+            urls = [urls];
+        }
+        const ids = urls.map(url => {
+            if (!this._isPublicEventUrl(url)) {
+                throw new Error(`Invalid public event URL: ${url}`);
+            }
+            return this.extractIdFromUrl(url);
+        });
         return this._batch_update_tags(ids, "remove", tags, 'event');
     }
 
     /**
     * Remove multiple tags from multiple routes - idempotent
-    * @param{NumberLike[]} ids - an array containing the ids of the routes to add the tags to
-    * @param{string[]} tags - an array of the tags to be removed from the routes
+    * @param{!(PublicRouteUrl | PublicRouteUrl[])} urls - an id or an array of ids of the resources to be tagged
+    * @param{!(string | string[])} tags - an optional tag or array of tags
     */
-    unTagRoutes(route_ids, tags) {
-        return this._batch_update_tags(route_ids, "remove", tags, 'route');
+    unTagRoutes(urls, tags) {
+        if (!Array.isArray(urls)) {
+            urls = [urls];
+        }
+        const ids = urls.map(url => {
+            if (!this._isPublicRouteUrl(url)) {
+                throw new Error(`Invalid public route URL: ${url}`);
+            }
+            return this.extractIdFromUrl(url);
+        });
+        return this._batch_update_tags(ids, "remove", tags, 'route');
     }
 }
