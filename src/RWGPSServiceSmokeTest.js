@@ -21,6 +21,7 @@ function RWGPSServiceSmokeTest() {
     testEditEvents();
     testGet();
     testGetAll();
+    testGetClubMembers();
     testGetEvent();
     testGetOrganizers();
     testGetRoute();
@@ -130,6 +131,18 @@ function testDeleteRoute() {
         console.error('deleteRoute() error:', error);
     }
 }
+
+function testGetClubMembers() {
+    console.log('\n--- Test: getClubMembers() ---');
+    const rwgpsService = getRWGPSService_();
+    try {
+        const membersResp = JSON.parse(rwgpsService.getClubMembers().getContentText());
+        console.log('getClubMembers called with this.apiService.fetchUserData()');
+        console.log('getClubMembers response:', membersResp);
+    } catch (error) {
+        console.error('getClubMembers() error:', error);
+    }
+}   
 
 function testEditEvent() {
     console.log('\n--- Test: edit_event() ---');

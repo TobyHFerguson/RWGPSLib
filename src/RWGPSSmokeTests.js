@@ -38,6 +38,7 @@ function main() {
     test_batch_delete_events()
     test_batch_delete_routes()
     test_copy_template()
+    test_get_club_members()
     test_edit_events()
     test_get_event()
     test_get_events()
@@ -113,6 +114,16 @@ function test_copy_template() {
     }
 }
 
+function test_get_club_members() {
+    console.log('\n--- Test: get_club_members() ---');
+    const { rwgpsService, rwgps, globals } = getRWGPSObjects_();
+    try {
+        const clubMembers = rwgps.get_club_members();
+        console.log('Club Members:', clubMembers);
+    } catch (error) {
+        console.error('get_club_members() error:', error);
+    }
+}
 
 function test_edit_event() {
 

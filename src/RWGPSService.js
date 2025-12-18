@@ -308,6 +308,15 @@ class RWGPSService {
     }
 
     /**
+     * get all the club members
+     * @returns {Object[ClubMember]}
+     */
+    getClubMembers() {
+        const url = `https://ridewithgps.com/clubs/47/table_members.json`;
+        return this.apiService.fetchUserData(url);
+    }
+
+    /**
      * 
      * @param {PublicEventUrl} url - public event URL
      * @returns {Object} event object as per https://github.com/ridewithgps/developers/blob/master/endpoints/events.md#get-apiv1eventsidjson

@@ -95,6 +95,16 @@ class RWGPS {
   }
 
   /**
+   * 
+   * @returns {ClubMember[]} An array of club members
+   */
+  get_club_members() {
+    const response= this.rwgpsService.getClubMembers();
+    const clubMembers = JSON.parse(response.getContentText());
+    return clubMembers;
+  }
+
+  /**
    * Get the event at the URL
    * @param{string} event_url
    * @returns{object} the event object
